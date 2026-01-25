@@ -1,4 +1,4 @@
-import adapter from '@sveltejs/adapter-vercel'; // Changed from adapter-auto
+import adapter from '@sveltejs/adapter-vercel';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 /** @type {import('@sveltejs/kit').Config} */
@@ -7,9 +7,8 @@ const config = {
 
 	kit: {
 		adapter: adapter({
-            // Optional: Stick to Nodejs for Supabase compatibility
-            // (Edge is faster but sometimes tricky with certain DB libraries)
-            runtime: 'nodejs18.x'
+            // CHANGED: nodejs18.x -> nodejs22.x
+            runtime: 'nodejs22.x'
         })
 	}
 };
