@@ -1,24 +1,70 @@
-test-results
-node_modules
+# ---------------------------------
+# 1. DEPENDENCIES & LOGS
+# ---------------------------------
+node_modules/
+.pnpm-store/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Output
-.output
-.vercel
-.netlify
-.wrangler
-/.svelte-kit
-/build
+# ---------------------------------
+# 2. BUILD OUTPUTS (SvelteKit + Vercel)
+# ---------------------------------
+# The massive hidden build folder
+/.svelte-kit/
+# Standard build output
+/build/
+# Vercel-specific builds
+.vercel/
+# Output folder for static adapters
+.output/
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Env
+# ---------------------------------
+# 3. ENVIRONMENT & SECRETS (Critical)
+# ---------------------------------
+# Ignore all .env files by default
 .env
 .env.*
+# But DO NOT ignore the example file (Documentation)
 !.env.example
 !.env.test
 
-# Vite
+# ---------------------------------
+# 4. OS & EDITOR JUNK
+# ---------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# VS Code - Ignore local settings but keep recommended extensions
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+
+# ---------------------------------
+# 5. TESTING & COVERAGE
+# ---------------------------------
+/coverage/
+/test-results/
+/playwright-report/
+/blob-report/
+
+# ---------------------------------
+# 6. SUPABASE & DATABASE (Optional)
+# ---------------------------------
+supabase/.temp/
+supabase/functions/*/deno.lock
+
+# ---------------------------------
+# 7. MISC
+# ---------------------------------
+# Vite temp files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
