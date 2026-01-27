@@ -1,5 +1,5 @@
 <script>
-  const webhookUrl = "https://hook.eu2.make.com/d5khh33w5i55xth8gbtwajd2subukjha";
+  const webhookUrl = "https://hook.eu2.make.com/h26b91d9pvhe1oywrjofh5khpenyq7rb";
 
   const payload = {
     "issue_id": "03ddc835-2d54-4ddf-b43e-49f7e313a8c5",
@@ -18,7 +18,8 @@
         "search_query": "Pneumatic actuator S3 proximity sensor timeout VUVG-L10-B52",
         "priority": "HIGH"
       },
-      "support_ticket_id": "66a8d99f-b005-42ce-be37-92bec6f48f04"
+      "request_id": "66a8d99f-b005-42ce-be37-92bec6f48f04",
+      "incident_id": "0fcb82cf-97fb-4d07-8ad4-8ae824b917f2"
     }
   };
 
