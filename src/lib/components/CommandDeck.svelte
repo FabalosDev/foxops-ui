@@ -464,3 +464,10 @@
     </div>
   </div>
 {/if}
+
+
+      <div class="mt-10 flex gap-4">
+        <a href="/support" target="_blank" class="px-6 py-3 border border-slate-700 hover:border-slate-500 text-slate-300 font-bold rounded transition-all">
+          Submit Tickets Here
+        </a>
+      </div>

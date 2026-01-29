@@ -1,66 +1,46 @@
-import { supabase } from '$lib/supabaseClient';
-import type { PageServerLoad } from './$types';
+// FILE: src/routes/+page.server.ts
+import { createClient } from '@supabase/supabase-js';
+import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
 
-export const load: PageServerLoad = async () => {
-  console.log('[FOXOPS SERVER] Fetching dashboard telemetry...');
+export const load = async () => {
+    const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
 
-  // Execute all DB queries in parallel for speed
-  const [activeRes, reportsRes, statsRes] = await Promise.all([
+    try {
+        // 1. Fetch all incidents for the 6 Cards and the 4 KPIs
+        const { data: allIncidents } = await supabase
+            .from('incidents')
+            .select('status, created_at, timestamp_drafted, sop_match_id');
 
-    // 1. Get Active Incidents (FIXED: Uses created_at)
-    supabase
-      .from('incidents')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(5),
+        // 2. Fetch SOP Hit Counts (Total Operations)
+        const { data: sopsData } = await supabase
+            .from('sops')
+            .select('hit_count');
 
-    // 2. Get Recent Forensic Reports
-    supabase
-      .from('incident_reports')
-      .select('*')
-      .order('archived_at', { ascending: false })
-      .limit(5),
+        const totalOps = sopsData?.reduce((sum, row) => sum + (row.hit_count || 0), 0) || 0;
 
-    // 3. Get ALL statuses for calculating counters
-    supabase
-      .from('incidents')
-      .select('status')
-  ]);
+        const incidents = allIncidents || [];
 
-  // Log errors for debugging
-  if (activeRes.error) console.error('[DB ERROR] Incidents:', activeRes.error);
-  if (reportsRes.error) console.error('[DB ERROR] Reports:', reportsRes.error);
+        return {
+            allIncidents: incidents, // Pass raw data for Frontend KPI logic
+            metrics: {
+                totalOps,
+            },
+            stats: {
+                investigating: incidents.filter(i => i.status?.includes('INVESTIGATING')).length,
+                learning: incidents.filter(i => i.status?.includes('LEARNING')).length,
+                selfHealed: incidents.filter(i => i.status?.includes('AUTO_HEALED')).length,
+                escalated: incidents.filter(i => i.status?.includes('ESCALATED')).length,
+                resolved: incidents.filter(i => i.status?.includes('RESOLVED')).length,
+                invalid: incidents.filter(i => i.status?.includes('CLOSED')).length
+            }
+        };
 
-  // Stats Calculation Logic
-  const allIncidents = statsRes.data || [];
-
-  const stats = {
-    active: allIncidents.filter(i =>
-      i.status.includes('ACTIVE') ||
-      i.status.includes('ANALYZING')
-    ).length,
-
-    healed: allIncidents.filter(i =>
-      i.status.includes('RESOLVED') ||
-      i.status.includes('HEALED')
-    ).length,
-
-    learning: allIncidents.filter(i =>
-      i.status.includes('LEARNING') ||
-      i.status.includes('DRAFT') ||
-      i.status.includes('USER_REPLIED')
-    ).length,
-
-    critical: allIncidents.filter(i =>
-      i.status.includes('ESCALATED') ||
-      i.status.includes('CRITICAL') ||
-      i.status.includes('ACTION_REQUIRED')
-    ).length
-  };
-
-  return {
-    activeIncidents: activeRes.data || [],
-    recentReports: reportsRes.data || [],
-    stats
-  };
+    } catch (err) {
+        console.error("Error fetching FoxOps metrics:", err);
+        return {
+            allIncidents: [],
+            metrics: { totalOps: 0 },
+            stats: { investigating: 0, learning: 0, selfHealed: 0, escalated: 0, resolved: 0, invalid: 0 }
+        };
+    }
 };

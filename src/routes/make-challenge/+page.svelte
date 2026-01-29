@@ -58,7 +58,7 @@
 
 <div class="min-h-screen bg-[#0F172A] text-slate-300 font-sans selection:bg-orange-500/30">
 
-<header class="fixed top-0 left-0 w-full z-50 border-b border-slate-800 bg-[#0B1121]/90 backdrop-blur-md transition-all duration-300">
+  <header class="fixed top-0 left-0 w-full z-50 border-b border-slate-800 bg-[#0B1121]/90 backdrop-blur-md transition-all duration-300">
 
     <div class="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10 pointer-events-none"></div>
 
