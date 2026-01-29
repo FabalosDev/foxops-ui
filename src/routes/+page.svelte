@@ -29,7 +29,6 @@
 } from 'lucide-svelte';
 
   export let data: PageData;
-  $: ({ recentReports, stats } = data);
 
   // Local State for Live Feed
   let activeIncidents: any[] = [];
@@ -60,6 +59,8 @@
   function toggleSopManager() {
     showSopManager = !showSopManager;
   }
+
+  $: ({ recentReports, stats } = data);
 
 // --- FETCH LOGIC ---
   async function fetchIncidents() {

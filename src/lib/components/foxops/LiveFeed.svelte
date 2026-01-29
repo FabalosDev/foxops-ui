@@ -229,7 +229,7 @@
      </div>
   </div>
 
-  <div class="overflow-x-auto flex-1 w-full">
+<div class="overflow-x-auto overflow-y-auto flex-1 w-full pb-20 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
     <table class="w-full text-left border-collapse">
       <thead>
         <tr class="bg-white/5 border-b border-white/5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
@@ -292,7 +292,7 @@
 
 {#if resolvingId}
 <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-  <div class="bg-[#0B1121] border border-white/10 w-full max-w-md rounded-xl p-6 shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+  <div class="bg-[#0B1121] border border-white/10 w-full max-w-md rounded-xl p-6 shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto pb-32">
 
     <div class="flex items-center justify-between mb-6">
         <h3 class="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
