@@ -49,7 +49,8 @@
         // Show everything NOT resolved or healed
         query = query.not('status', 'ilike', '%RESOLVED%')
                      .not('status', 'ilike', '%HEALED%')
-                     .not('status', 'ilike', '%OVERRIDE%');
+                     .not('status', 'ilike', '%OVERRIDE%')
+                     .not('status', 'ilike', '%CLOSED%');
     } else if (activeFilter === 'RESOLVED') {
         // Show only resolved/healed
         query = query.or('status.ilike.%RESOLVED%,status.ilike.%HEALED%,status.ilike.%OVERRIDE%');
