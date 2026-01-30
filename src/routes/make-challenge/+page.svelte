@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import Footer from '$lib/components/Footer.svelte';
   import {
     Cpu,
     Network,
@@ -7,7 +8,10 @@
     ShieldCheck,
     PlayCircle,
     Layers,
-    Terminal
+    Terminal,
+    Activity,
+    Workflow,
+    Ticket
   } from 'lucide-svelte';
 
   // --- NAVIGATION DATA ---
@@ -117,7 +121,7 @@
 
   <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 pt-28 pb-20">
 
-    <aside class="hidden lg:block lg:col-span-3 relative">
+<aside class="hidden lg:block lg:col-span-3 relative">
       <div class="sticky top-32 space-y-8">
 
         <nav class="space-y-1">
@@ -134,13 +138,46 @@
           {/each}
         </nav>
 
+<div class="pt-6 border-t border-slate-800 space-y-3">
+          <div class="px-4 text-xs font-bold uppercase tracking-widest text-slate-500">Logic Evolution</div>
+
+          <a href="/flowchartv3.svg" target="_blank" class="block px-4 py-1 text-sm text-slate-400 hover:text-emerald-400 transition-colors flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span class="font-bold text-emerald-400">v3.0 Final</span> (Latest)
+          </a>
+
+          <a href="/flowchartv2.png" target="_blank" class="block px-4 py-1 text-sm text-slate-400 hover:text-orange-400 transition-colors flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+            <span>v2.0 Beta</span> (Revised)
+          </a>
+
+          <a href="/flowchartv1.png" target="_blank" class="block px-4 py-1 text-sm text-slate-400 hover:text-blue-400 transition-colors flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+            <span>v1.0 Alpha</span> (Legacy)
+          </a>
+        </div>
+
         <div class="pt-6 border-t border-slate-800 space-y-3">
           <div class="px-4 text-xs font-bold uppercase tracking-widest text-slate-500">Resources</div>
-          <a href="https://github.com/FabalosDev/foxops-ui" target="_blank" class="block px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors">
+
+          <a href="https://github.com/FabalosDev/foxops-ui" target="_blank" class="block px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2">
             View GitHub Repo
           </a>
-          <a href="https://fabalos.com" target="_blank" class="block px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors">
+
+          <a href="https://community.make.com" target="_blank" class="block px-4 py-2 text-sm text-slate-400 hover:text-orange-400 transition-colors flex items-center gap-2">
+             Make.com Community
+          </a>
+        </div>
+
+        <div class="pt-6 border-t border-slate-800 space-y-3">
+          <div class="px-4 text-xs font-bold uppercase tracking-widest text-slate-500">Ecosystem</div>
+
+          <a href="https://fabalos.com" target="_blank" class="block px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2">
             Fabalos Automation
+          </a>
+
+          <a href="https://floflux.com" target="_blank" class="block px-4 py-2 text-sm text-slate-400 hover:text-blue-400 transition-colors flex items-center gap-2">
+             Floflux Distro
           </a>
         </div>
 
@@ -321,7 +358,7 @@
           <div class="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent pointer-events-none"></div>
 
           <img
-            src="/flowchart.svg"
+            src="/flowchartv3.svg"
             alt="FoxOps Architecture Flowchart"
             class="relative z-10 w-full h-auto max-w-5xl rounded-lg shadow-lg filter invert brightness-125 contrast-125 opacity-90"
           />
@@ -355,66 +392,122 @@
         </div>
       </section>
 
-      <section id="data-schema" class="scroll-mt-32 space-y-6">
+    <section id="data-schema" class="scroll-mt-32 space-y-6">
         <h2 class="text-2xl font-bold text-white flex items-center gap-3">
           <Database class="text-orange-500" /> Core Schema
         </h2>
         <p class="text-slate-400">
-          We maintain two primary tables in Supabase to balance long-term knowledge with transactional activity.
+          We utilize a tri-fold database structure: <strong>Incidents</strong> for high-velocity ingestion, <strong>SOPs</strong> for vector retention, and <strong>Tickets</strong> for human workflow.
         </p>
 
         <div class="space-y-4">
+
           <div class="border border-slate-800 rounded-lg overflow-hidden">
-            <div class="bg-slate-900 px-4 py-2 border-b border-slate-800 font-mono text-sm font-bold text-white">
-              table: sops (The "Hard Drive")
+            <div class="bg-slate-900 px-4 py-2 border-b border-slate-800 font-mono text-sm font-bold text-white flex justify-between items-center">
+              <span>table: incidents (The "Live Stream")</span>
+              <span class="text-[10px] text-emerald-400 uppercase tracking-wider">High Velocity</span>
             </div>
             <div class="p-4 bg-[#0B1121] text-xs font-mono text-slate-400 space-y-2">
-              <div class="flex justify-between"><span class="text-blue-400">id</span> <span>uuid (PK)</span></div>
-              <div class="flex justify-between"><span class="text-blue-400">embedding</span> <span>vector(1536)</span></div>
-              <div class="flex justify-between"><span class="text-blue-400">workflow_description</span> <span>text</span></div>
-              <div class="flex justify-between"><span class="text-blue-400">hit_count</span> <span>int8</span></div>
+              <div class="flex justify-between border-b border-white/5 pb-1"><span class="text-blue-400">id</span> <span>uuid (PK)</span></div>
+              <div class="flex justify-between border-b border-white/5 pb-1"><span class="text-blue-400">raw_payload</span> <span>jsonb</span></div>
+              <div class="flex justify-between border-b border-white/5 pb-1"><span class="text-blue-400">status</span> <span>varchar (active, resolved)</span></div>
+              <div class="flex justify-between border-b border-white/5 pb-1"><span class="text-blue-400">priority</span> <span>varchar (critical, low)</span></div>
+              <div class="flex justify-between"><span class="text-blue-400">sop_match_id</span> <span>uuid (FK: sops.id)</span></div>
             </div>
           </div>
 
           <div class="border border-slate-800 rounded-lg overflow-hidden">
-            <div class="bg-slate-900 px-4 py-2 border-b border-slate-800 font-mono text-sm font-bold text-white">
-              table: support_tickets (The "Activity Queue")
+            <div class="bg-slate-900 px-4 py-2 border-b border-slate-800 font-mono text-sm font-bold text-white flex justify-between items-center">
+              <span>table: sops (The "Hard Drive")</span>
+              <span class="text-[10px] text-purple-400 uppercase tracking-wider">Vector Store</span>
             </div>
             <div class="p-4 bg-[#0B1121] text-xs font-mono text-slate-400 space-y-2">
-              <div class="flex justify-between"><span class="text-blue-400">ticket_id</span> <span>uuid (PK)</span></div>
-              <div class="flex justify-between"><span class="text-blue-400">raw_error</span> <span>text</span></div>
-              <div class="flex justify-between"><span class="text-blue-400">status</span> <span>enum ('investigating', 'healed')</span></div>
-              <div class="flex justify-between"><span class="text-blue-400">sop_match_id</span> <span>uuid (FK)</span></div>
+              <div class="flex justify-between border-b border-white/5 pb-1"><span class="text-blue-400">id</span> <span>uuid (PK)</span></div>
+              <div class="flex justify-between border-b border-white/5 pb-1"><span class="text-blue-400">embedding</span> <span>vector(1536)</span></div>
+              <div class="flex justify-between border-b border-white/5 pb-1"><span class="text-blue-400">title</span> <span>text</span></div>
+              <div class="flex justify-between"><span class="text-blue-400">workflow_description</span> <span>text (Context)</span></div>
             </div>
           </div>
+
+          <div class="border border-slate-800 rounded-lg overflow-hidden">
+            <div class="bg-slate-900 px-4 py-2 border-b border-slate-800 font-mono text-sm font-bold text-white flex justify-between items-center">
+              <span>table: support_tickets (The "Human Queue")</span>
+              <span class="text-[10px] text-orange-400 uppercase tracking-wider">Manual Ops</span>
+            </div>
+            <div class="p-4 bg-[#0B1121] text-xs font-mono text-slate-400 space-y-2">
+              <div class="flex justify-between border-b border-white/5 pb-1"><span class="text-blue-400">ticket_id</span> <span>uuid (PK)</span></div>
+              <div class="flex justify-between border-b border-white/5 pb-1"><span class="text-blue-400">incident_id</span> <span>uuid (FK: incidents.id)</span></div>
+              <div class="flex justify-between border-b border-white/5 pb-1"><span class="text-blue-400">assigned_technician</span> <span>text</span></div>
+              <div class="flex justify-between"><span class="text-blue-400">resolution_notes</span> <span>text</span></div>
+            </div>
+          </div>
+
         </div>
       </section>
 
-      <section id="scenarios" class="scroll-mt-32 space-y-6">
+<section id="scenarios" class="scroll-mt-32 space-y-6">
         <h2 class="text-2xl font-bold text-white flex items-center gap-3">
           <Layers class="text-orange-500" /> Stress Test Scenarios
         </h2>
+        <p class="text-slate-400 max-w-2xl">
+           We configured the Command Deck to inject four distinct classes of failure, testing the system's ability to handle IT, OT, and Security incidents simultaneously.
+        </p>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-          <div class="p-6 rounded-lg bg-slate-900 border border-slate-800 hover:border-orange-500/30 transition-colors">
-            <div class="text-orange-500 text-xs font-bold uppercase mb-2">Scenario 01</div>
-            <h3 class="text-white font-bold text-lg mb-2">Pneumatic Valve Stiction</h3>
-            <p class="text-sm text-slate-400 mb-4">
-              A Festo valve reports high friction. The system identifies "Lubrication Interval Missed" and schedules maintenance.
+          <div class="p-6 rounded-lg bg-slate-900 border border-slate-800 hover:border-orange-500/30 transition-colors group">
+            <div class="flex justify-between items-start mb-4">
+               <div class="text-orange-500 text-xs font-bold uppercase tracking-widest border border-orange-500/20 px-2 py-1 rounded bg-orange-500/10">Physical Layer</div>
+               <Cpu class="text-slate-600 group-hover:text-orange-500 transition-colors" size={20} />
+            </div>
+            <h3 class="text-white font-bold text-lg mb-2">Pneumatic Pressure Drop</h3>
+            <p class="text-sm text-slate-400 mb-4 leading-relaxed">
+              Simulates a Festo CP Factory sensor reporting 3.2 bar (below 4.0 threshold). The engine must identify the hardware fault and trigger a "Maintenance Stop" SOP.
             </p>
-            <div class="text-xs font-mono bg-black p-2 rounded text-slate-500">
-              > Error: 0x4F_FRICTION_HIGH
+            <div class="text-xs font-mono bg-black p-3 rounded text-slate-500 border border-slate-800">
+              > ERR_CODE: P_LOW_CRITICAL_01
             </div>
           </div>
 
-          <div class="p-6 rounded-lg bg-slate-900 border border-slate-800 hover:border-orange-500/30 transition-colors">
-            <div class="text-blue-500 text-xs font-bold uppercase mb-2">Scenario 02</div>
-            <h3 class="text-white font-bold text-lg mb-2">Database Connection Pool</h3>
-            <p class="text-sm text-slate-400 mb-4">
-              Dashboard fails with 500 error. System identifies "Max Connections Reached" and kills idle PID processes.
+          <div class="p-6 rounded-lg bg-slate-900 border border-slate-800 hover:border-purple-500/30 transition-colors group">
+            <div class="flex justify-between items-start mb-4">
+               <div class="text-purple-500 text-xs font-bold uppercase tracking-widest border border-purple-500/20 px-2 py-1 rounded bg-purple-500/10">Integration Layer</div>
+               <Workflow class="text-slate-600 group-hover:text-purple-500 transition-colors" size={20} />
+            </div>
+            <h3 class="text-white font-bold text-lg mb-2">API Rate Limit Burst</h3>
+            <p class="text-sm text-slate-400 mb-4 leading-relaxed">
+              Floods the system with OpenAI requests to trigger a `429 Too Many Requests`. The engine must catch the error and implement an exponential backoff strategy.
             </p>
-            <div class="text-xs font-mono bg-black p-2 rounded text-slate-500">
-              > Error: 500_INTERNAL_SERVER
+            <div class="text-xs font-mono bg-black p-3 rounded text-slate-500 border border-slate-800">
+              > HTTP 429: RETRY_AFTER_20S
+            </div>
+          </div>
+
+          <div class="p-6 rounded-lg bg-slate-900 border border-slate-800 hover:border-blue-500/30 transition-colors group">
+             <div class="flex justify-between items-start mb-4">
+               <div class="text-blue-500 text-xs font-bold uppercase tracking-widest border border-blue-500/20 px-2 py-1 rounded bg-blue-500/10">Security Layer</div>
+               <Ticket class="text-slate-600 group-hover:text-blue-500 transition-colors" size={20} />
+            </div>
+            <h3 class="text-white font-bold text-lg mb-2">Auth Token Expiry</h3>
+            <p class="text-sm text-slate-400 mb-4 leading-relaxed">
+              Injects a "403 Forbidden" error during a user password reset flow. Tests the system's ability to distinguish between a hack attempt and a valid support ticket.
+            </p>
+            <div class="text-xs font-mono bg-black p-3 rounded text-slate-500 border border-slate-800">
+              > 403_FORBIDDEN_ACCESS
+            </div>
+          </div>
+
+          <div class="p-6 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-500/30 transition-colors group">
+             <div class="flex justify-between items-start mb-4">
+               <div class="text-emerald-500 text-xs font-bold uppercase tracking-widest border border-emerald-500/20 px-2 py-1 rounded bg-emerald-500/10">Infra Layer</div>
+               <Activity class="text-slate-600 group-hover:text-emerald-500 transition-colors" size={20} />
+            </div>
+            <h3 class="text-white font-bold text-lg mb-2">Service Availability (503)</h3>
+            <p class="text-sm text-slate-400 mb-4 leading-relaxed">
+              Simulates a total outage of the Public API gateway. The engine must route traffic to a fallback node or notify stakeholders immediately.
+            </p>
+            <div class="text-xs font-mono bg-black p-3 rounded text-slate-500 border border-slate-800">
+              > 503_SERVICE_UNAVAILABLE
             </div>
           </div>
 
@@ -439,3 +532,5 @@
 
   </div>
 </div>
+
+<Footer activeIncidents={[]} />

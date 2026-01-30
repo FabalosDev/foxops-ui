@@ -1,7 +1,10 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
   import { supabase } from '$lib/supabaseClient';
-  import { Activity, CheckCircle2, ShieldAlert, UserCheck, Send, Loader2, BookOpen, User, FileText, ArrowLeft, ArrowRight } from 'lucide-svelte';
+  import {
+    Activity, CheckCircle2, ShieldAlert, UserCheck, Send, Loader2,
+    BookOpen, User, FileText, ArrowLeft, ArrowRight, Filter
+  } from 'lucide-svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -10,9 +13,10 @@
   let page = 0;
   let loading = false;
   let hasMore = true;
-
-  // ARCHITECT FIX: Reduced from 10 to 7 to fit dashboard viewports better
   const PAGE_SIZE = 7;
+
+  // FILTER STATE
+  let activeFilter = 'ALL'; // Options: ALL, ACTIVE, RESOLVED, CRITICAL
 
   // --- RESOLUTION MODAL STATE ---
   let resolvingId: string | null = null;
@@ -33,24 +37,32 @@
     const from = pageIndex * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
 
-    // A. FETCH RAW DATA
-    const { data, error } = await supabase
+    // A. BUILD QUERY DYNAMICALLY
+    let query = supabase
       .from('incidents')
       .select('*')
       .range(from, to)
       .order('created_at', { ascending: false });
 
+    // B. APPLY SERVER-SIDE FILTERS
+    if (activeFilter === 'ACTIVE') {
+        // Show everything NOT resolved or healed
+        query = query.not('status', 'ilike', '%RESOLVED%')
+                     .not('status', 'ilike', '%HEALED%')
+                     .not('status', 'ilike', '%OVERRIDE%');
+    } else if (activeFilter === 'RESOLVED') {
+        // Show only resolved/healed
+        query = query.or('status.ilike.%RESOLVED%,status.ilike.%HEALED%,status.ilike.%OVERRIDE%');
+    } else if (activeFilter === 'CRITICAL') {
+        query = query.eq('priority', 'CRITICAL');
+    }
+
+    const { data, error } = await query;
+
     if (!error && data) {
-      // B. CLIENT-SIDE SORTING
+      // C. CLIENT-SIDE SORTING (Visual Rank)
       incidents = data.sort((a, b) => {
-        // 1. Status Rank: Open > Resolved
-        const isResolvedA = a.status?.includes('RESOLVED') || a.status?.includes('MANUAL_OVERRIDE');
-        const isResolvedB = b.status?.includes('RESOLVED') || b.status?.includes('MANUAL_OVERRIDE');
-
-        if (!isResolvedA && isResolvedB) return -1;
-        if (isResolvedA && !isResolvedB) return 1;
-
-        // 2. Priority Rank
+        // Priority Rank
         const score = (p: string) => {
           if (!p) return 10;
           if (p.includes('CRITICAL')) return 0;
@@ -65,6 +77,13 @@
     }
 
     loading = false;
+  }
+
+  function changeFilter(newFilter: string) {
+      if (activeFilter === newFilter) return;
+      activeFilter = newFilter;
+      page = 0; // Reset to first page
+      fetchIncidents(0);
   }
 
   function nextPage() {
@@ -83,15 +102,12 @@
   onMount(() => {
     fetchIncidents(0);
 
+    // Realtime Listener
     const subscription = supabase
       .channel('live_incidents')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'incidents' }, (payload) => {
-        if (page === 0) {
-           incidents = [payload.new, ...incidents].slice(0, PAGE_SIZE);
-        }
-      })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'incidents' }, (payload) => {
-         incidents = incidents.map(i => i.id === payload.new.id ? payload.new : i);
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'incidents' }, () => {
+         // Refresh current view on change to keep filter valid
+         fetchIncidents(page);
       })
       .subscribe();
 
@@ -113,15 +129,6 @@
     if (!status) return 'UNKNOWN';
     if (status.includes('MANUAL_OVERRIDE')) return 'MANUAL OVERRIDE';
     return status.replace('⚡', '').replace('✅', '').split(':')[0].trim();
-  }
-
-  // --- 3. HTML GENERATOR ---
-  function generateHtmlReport(data: any) {
-    // ... (Keep existing HTML generator logic as is) ...
-    // Just returning a simple string here to save space in this response block,
-    // BUT IN YOUR CODE, KEEP THE FULL FUNCTION I GAVE EARLIER.
-    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
-    return ``;
   }
 
   // --- 4. ACTIONS ---
@@ -148,8 +155,10 @@
   async function resolveIncident(id: string) {
     const updatePayload: any = { status: '✅ RESOLVED: MANUAL_OVERRIDE', priority: 'LOW' };
     if (selectedSop !== 'none' && selectedSop !== 'new') updatePayload.resolved_by_sop_id = selectedSop;
-    incidents = incidents.map(i => i.id === id ? { ...i, ...updatePayload } : i);
+
     await supabase.from('incidents').update(updatePayload).eq('id', id);
+    // Refresh to update list (might remove item if filter is ACTIVE)
+    fetchIncidents(page);
   }
 
   async function triggerFinalReport(incident: any) {
@@ -157,26 +166,68 @@
     isReporting = true;
     const reportWebhook = "https://hook.eu2.make.com/mmqk3qu5dg2eyc1zvjsb6vnuq84kv5g7";
 
-    // ... (Keep existing report logic) ...
+    // Simplified Report Generation Logic
+    const timestamp = new Date().toISOString();
+    let finalSopTitle = incident.title;
+    let finalSopContent = "No SOP";
+    if (selectedSop !== 'none' && selectedSop !== 'new') {
+        const s = availableSops.find(x => x.id === selectedSop);
+        if (s) { finalSopTitle = s.name; finalSopContent = s.workflow_description; }
+    }
 
-    // For brevity in this fix block, assume logic is same as before.
-    // Just simulating success:
-    setTimeout(async () => {
+    const payload = {
+        incidentId: incident.id,
+        ticketId: resolvingTicketId,
+        technician: technicianName,
+        notes: resolutionNotes,
+        sop: finalSopTitle,
+        html_report: `` // Placeholder for full HTML gen
+    };
+
+    try {
+        await fetch(reportWebhook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
         await resolveIncident(incident.id);
         resolvingId = null;
+    } catch (e) {
+        console.error(e);
+    } finally {
         isReporting = false;
-    }, 1000);
+    }
   }
 </script>
 
 <div class="bg-[#0B1121] border border-white/5 rounded-xl overflow-hidden shadow-2xl flex flex-col h-full min-h-0">
 
   <div class="p-3 border-b border-white/5 flex justify-between items-center bg-[#080c17]">
-     <div class="flex items-center gap-2">
-         <Activity size={14} class="text-orange-500" />
-         <h2 class="text-xs font-bold text-white uppercase tracking-widest">
-           Live Feed <span class="text-slate-500 text-[9px] ml-1">(Page {page + 1})</span>
-         </h2>
+     <div class="flex items-center gap-4">
+         <div class="flex items-center gap-2">
+             <Activity size={14} class="text-orange-500" />
+             <h2 class="text-xs font-bold text-white uppercase tracking-widest">
+               Live Feed
+             </h2>
+         </div>
+
+         <div class="flex items-center gap-1 bg-white/5 p-1 rounded-lg border border-white/5">
+            <button
+                on:click={() => changeFilter('ALL')}
+                class="px-2 py-1 rounded text-[9px] font-bold uppercase transition-all {activeFilter === 'ALL' ? 'bg-slate-700 text-white shadow' : 'text-slate-500 hover:text-slate-300'}"
+            >All</button>
+            <button
+                on:click={() => changeFilter('ACTIVE')}
+                class="px-2 py-1 rounded text-[9px] font-bold uppercase transition-all flex items-center gap-1 {activeFilter === 'ACTIVE' ? 'bg-orange-600/20 text-orange-400 border border-orange-500/20 shadow' : 'text-slate-500 hover:text-slate-300'}"
+            >
+                {#if activeFilter === 'ACTIVE'}<span class="relative flex h-1.5 w-1.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-orange-500"></span></span>{/if}
+                Active
+            </button>
+            <button
+                on:click={() => changeFilter('RESOLVED')}
+                class="px-2 py-1 rounded text-[9px] font-bold uppercase transition-all {activeFilter === 'RESOLVED' ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/20 shadow' : 'text-slate-500 hover:text-slate-300'}"
+            >Resolved</button>
+            <button
+                on:click={() => changeFilter('CRITICAL')}
+                class="px-2 py-1 rounded text-[9px] font-bold uppercase transition-all {activeFilter === 'CRITICAL' ? 'bg-rose-600/20 text-rose-400 border border-rose-500/20 shadow' : 'text-slate-500 hover:text-slate-300'}"
+            >Critical</button>
+         </div>
      </div>
 
      <div class="flex items-center gap-2">
@@ -189,13 +240,7 @@
           </button>
         </div>
         <div class="h-3 w-[1px] bg-white/10 mx-1"></div>
-        <div class="flex items-center gap-2">
-           <span class="relative flex h-1.5 w-1.5">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-           </span>
-           <span class="text-[9px] font-mono text-slate-500">{loading ? 'SYNC...' : 'LIVE'}</span>
-        </div>
+        <span class="text-[9px] font-mono text-slate-500 w-12 text-right">PG {page + 1}</span>
      </div>
   </div>
 
@@ -214,7 +259,7 @@
            <tr>
              <td colspan="4" class="p-8 text-center text-orange-500">
                <Loader2 size={20} class="animate-spin mx-auto mb-2" />
-               <span class="text-[10px] font-mono">Fetching Telemetry...</span>
+               <span class="text-[10px] font-mono">Syncing Database...</span>
              </td>
            </tr>
         {:else if incidents.length === 0}
@@ -222,7 +267,10 @@
                 <td colspan="4" class="p-8 text-center">
                     <div class="flex flex-col items-center gap-2 text-slate-600">
                         <CheckCircle2 size={24} class="opacity-20" />
-                        <span class="text-[10px] font-mono">No incidents found.</span>
+                        <span class="text-[10px] font-mono">
+                            {#if activeFilter === 'ACTIVE'}No active threats. The floor is clean.
+                            {:else}No records found.{/if}
+                        </span>
                     </div>
                 </td>
             </tr>
@@ -246,7 +294,7 @@
                       Logs
                   </button>
 
-                  {#if incident.status && (incident.status.includes('CRITICAL') || incident.status.includes('ESCALATED') || incident.status.includes('HIGH'))}
+                  {#if incident.status && (incident.status.includes('CRITICAL') || incident.status.includes('ESCALATED') || incident.status.includes('HIGH') || incident.status.includes('INVESTIGATING'))}
                       <button
                       on:click={() => openResolveModal(incident.id)}
                       class="px-2 py-1 bg-rose-600/20 hover:bg-rose-600/40 text-rose-400 border border-rose-500/50 rounded text-[9px] font-bold uppercase tracking-wider flex items-center gap-1"
@@ -286,7 +334,29 @@
         </label>
         <input bind:value={technicianName} type="text" class="w-full bg-black/40 border border-white/10 rounded p-2 text-xs text-white focus:border-emerald-500/50 outline-none font-bold"/>
     </div>
-    <div class="flex justify-end gap-3 mt-4">
+    <div class="mb-4 bg-white/5 p-3 rounded-lg border border-white/5">
+        <label class="text-[10px] text-blue-400 font-bold uppercase mb-2 flex items-center gap-2">
+            <BookOpen size={12} /> SOP Link (Standard Procedure)
+        </label>
+        <select bind:value={selectedSop} class="w-full bg-black/40 border border-white/10 rounded p-2 text-xs text-slate-300 focus:border-blue-500/50 outline-none mb-2">
+            <option value="none" class="text-slate-500">-- No SOP Linked --</option>
+            <option value="new" class="text-emerald-400 font-bold">+ Create New SOP</option>
+            <optgroup label="Existing Library">
+                {#each availableSops as sop}
+                    <option value={sop.id}>{sop.name}</option>
+                {/each}
+            </optgroup>
+        </select>
+        {#if selectedSop === 'new'}
+            <div class="mt-3 space-y-2 animate-in fade-in slide-in-from-top-2">
+                <input bind:value={newSopTitle} placeholder="SOP Title" class="w-full bg-emerald-900/20 border border-emerald-500/30 rounded p-2 text-xs text-emerald-100 placeholder-emerald-500/50 focus:outline-none"/>
+                <textarea bind:value={newSopContent} placeholder="Standard Steps..." class="w-full bg-emerald-900/10 border border-emerald-500/20 rounded p-2 text-xs text-emerald-100 placeholder-emerald-500/30 focus:outline-none h-20 resize-none"></textarea>
+            </div>
+        {/if}
+    </div>
+    <label class="text-[10px] text-slate-500 font-bold uppercase mb-2 flex items-center gap-2"><FileText size={12} /> Incident Notes</label>
+    <textarea bind:value={resolutionNotes} placeholder="Describe the specific fix..." class="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-xs text-slate-200 focus:border-emerald-500/50 outline-none h-24 resize-none mb-4"></textarea>
+    <div class="flex justify-end gap-3">
       <button on:click={() => resolvingId = null} class="px-4 py-2 text-xs text-slate-500 hover:text-white uppercase font-bold">Cancel</button>
       <button on:click={() => triggerFinalReport(incidents.find(i => i.id === resolvingId))} disabled={!resolutionNotes || isReporting} class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold uppercase rounded flex items-center gap-2 disabled:opacity-50 transition-all">
         {#if isReporting}<Loader2 size={14} class="animate-spin" /> Processing...{:else}<Send size={14} /> Submit{/if}
