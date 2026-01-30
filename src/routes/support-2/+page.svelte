@@ -1,9 +1,5 @@
-<script lang="ts">
-  import { Cpu, PlayCircle, Trash2 } from 'lucide-svelte';
-
-  // --- CONFIGURATION ---
-  // Hitting your local server endpoint now
-  const API_ENDPOINT = "/api/incidents/ingest";
+<script>
+  import { Cpu, PlayCircle, Activity, Server, ShieldAlert, Wifi, Trash2 } from 'lucide-svelte';
 
   const tenants = [
     { id: 'FAB-IND-01', name: 'Festo Industrial Plant', contact_email: 'demo+festo@fabalos.com', contact_name: 'Chief Engineer Hans' },
@@ -11,11 +7,11 @@
     { id: 'FAB-AGR-03', name: 'AgriFlow Automation', contact_email: 'demo+agriflow@fabalos.com', contact_name: 'Field Tech Mike' }
   ];
 
-  const sources = [
+const sources = [
     {
       id: 'support_portal',
       label: '1. Support Ticket (Human)',
-      origin: 'foxops_portal',
+      origin: 'foxops.fabalos.com/support',
       priority: 'LOW',
       defaultTitle: 'Reporting Module Error',
       defaultError: 'The monthly PDF export is failing with a 504 Gateway Timeout. This is blocking the finance team.'
@@ -64,41 +60,24 @@
 
   async function submitTicket() {
     status = "loading";
-    const selectedTenant = tenants.find(t => t.id === clientId) || tenants[0];
+    const webhookUrl = "https://normalizer.fabaverse.workers.dev/";
+    const selectedTenant = tenants.find(t => t.id === clientId);
 
-    // --- ARCHITECT FIX: FLATTENED PAYLOAD ---
-    // We send the 9 keys directly to the server. No nesting.
-    const flatPayload = {
-      origin: selectedSource.origin,
-      priority: selectedSource.priority,
-      user_email: selectedTenant.contact_email,
-      user_company: selectedTenant.name,
-      user_name: selectedTenant.contact_name,
-      user_id: selectedTenant.id,
-      incident_title: ticketTitle,
-      incident_raw: rawError,
-      timestamp: new Date().toISOString()
+    const payload = {
+      payload: {
+        input: {
+          meta: { ref_id: crypto.randomUUID(), origin: selectedSource.origin, priority: selectedSource.priority },
+          identity: { user_email: selectedTenant.contact_email, user_company: selectedTenant.name, user_name: selectedTenant.contact_name, user_id: selectedTenant.id },
+          incident: { title: ticketTitle, timestamp: new Date().toISOString(), raw: rawError }
+        }
+      }
     };
 
     try {
-      // Hit our own server endpoint
-      const res = await fetch(API_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(flatPayload)
-      });
-
-      if (res.ok) {
-        status = "success";
-        setTimeout(() => { status = "idle" }, 2000);
-      } else {
-        console.error("Server responded with error:", await res.text());
-        status = "error";
-      }
-    } catch (err) {
-      console.error("Network error:", err);
-      status = "error";
-    }
+      const res = await fetch(webhookUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      if (res.ok) { status = "success"; setTimeout(() => { status = "idle" }, 2000); }
+      else { status = "error"; }
+    } catch (err) { status = "error"; }
   }
 </script>
 
@@ -172,8 +151,6 @@
 
       {#if status === 'success'}
         <p class="text-center text-green-400 text-[10px] mt-4 uppercase font-bold animate-pulse">✓ Telemetry_Logged_Success</p>
-      {:else if status === 'error'}
-        <p class="text-center text-rose-400 text-[10px] mt-4 uppercase font-bold">× Connection_Failed</p>
       {/if}
     </form>
   </div>

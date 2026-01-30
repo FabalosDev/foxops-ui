@@ -14,24 +14,24 @@
 
   // --- ICONS ---
   import {
-  Search,
-  Zap,
-  Brain,
-  AlertTriangle,
-  CheckCircle2,
-  XCircle,
-  BarChart3,
-  BookOpen,
-  Clock,
-  Activity,
-  ShieldCheck,
-  Target
-} from 'lucide-svelte';
+    Search,
+    Zap,
+    Brain,
+    AlertTriangle,
+    CheckCircle2,
+    XCircle,
+    BarChart3,
+    BookOpen,
+    Clock,
+    Activity,
+    ShieldCheck,
+    Target
+  } from 'lucide-svelte';
 
   export let data: PageData;
 
   // Local State for Live Feed
-  let activeIncidents: any[] = [];
+  let activeIncidents: any[] = data.allIncidents || [];
 
   // --- STATE ---
   let showSopManager = false;
@@ -62,9 +62,8 @@
 
   $: ({ recentReports, stats } = data);
 
-// --- FETCH LOGIC ---
+  // --- FETCH LOGIC ---
   async function fetchIncidents() {
-    // FIX: Idinagdag natin ang '!fk_incidents' para ituro ang specific na relationship
     const { data, error } = await supabase
         .from('incidents')
         .select(`
@@ -80,7 +79,6 @@
         console.error("Error fetching incidents:", error);
     } else {
         activeIncidents = (data || []).map(inc => {
-            // Check kung array o object (Supabase returns array for 1:Many relationships)
             const ticketData = Array.isArray(inc.support_tickets)
                 ? inc.support_tickets[0]
                 : inc.support_tickets;
@@ -88,20 +86,17 @@
             return {
                 ...inc,
                 sop_match_id: ticketData?.sop_match_id || null,
-
-                // MAPPING: Kunin ang ID mula sa ticketData na hinila natin
                 linked_ticket_id: ticketData?.id || null
             };
         });
         console.log("Incidents Loaded:", activeIncidents.length);
     }
   }
+
   // --- LIFECYCLE ---
   onMount(async () => {
-    // 1. Initial Fetch
     await fetchIncidents();
 
-    // 2. Realtime Listener
     realtimeSubscription = supabase
       .channel('dashboard-feed')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'incidents' }, (payload) => {
@@ -116,8 +111,8 @@
     if (realtimeSubscription) supabase.removeChannel(realtimeSubscription);
   });
 
-  // --- KPI CALCULATIONS ---
- $: computedStats = {
+// --- KPI CALCULATIONS ---
+  $: computedStats = {
     // 1. SIGNAL-TO-NOISE RATIO (SNR)
     snr: activeIncidents.length > 0
       ? Math.round((activeIncidents.filter(i => i.status?.includes('NON_ACTIONABLE')).length / activeIncidents.length) * 100)
@@ -125,54 +120,80 @@
 
     // 2. KNOWLEDGE CAPTURE RATE (KCR)
     kcr: (() => {
-      // Filter for actionable items (ignore noise)
       const actionable = activeIncidents.filter(i => !i.status?.includes('NON_ACTIONABLE'));
       if (actionable.length === 0) return 0;
-
-      // Count items that have a draft timestamp (Not null)
       const drafted = actionable.filter(i => i.timestamp_drafted).length;
       return Math.round((drafted / actionable.length) * 100);
     })(),
 
     // 3. MEAN TIME TO DOCUMENTATION (MTTD)
     avgMttd: (() => {
-      // STRICT FILTER: Must have both created_at AND timestamp_drafted
-      const documented = activeIncidents.filter(i => i.timestamp_drafted && i.created_at);
+      const documented = activeIncidents.filter(i => {
+         const hasEnd = i.timestamp_drafted || i.time_drafted;
+         const hasStart = i.created_at || i.generated_at;
+         return hasEnd && hasStart;
+      });
 
       if (documented.length === 0) return "0.0s";
 
       const totalSeconds = documented.reduce((acc, curr) => {
-        const start = new Date(curr.created_at).getTime();
-        const end = new Date(curr.timestamp_drafted).getTime();
-        // Prevent negative numbers or NaNs
-        const diff = (end - start) > 0 ? (end - start) : 0;
-        return acc + diff;
+        const startStr = curr.created_at || curr.generated_at;
+        const endStr = curr.timestamp_drafted || curr.time_drafted;
+
+        const start = new Date(startStr).getTime();
+        const end = new Date(endStr).getTime();
+
+        if (isNaN(start) || isNaN(end)) return acc;
+
+        const diff = end - start;
+        return acc + (diff > 0 ? diff : 0);
       }, 0);
 
-      // Calculate Average
       const avg = totalSeconds / documented.length / 1000;
       return avg.toFixed(1) + 's';
     })(),
 
-    // 4. HEALING ACCURACY (AHA)
+    // 4. HEALING ACCURACY (AHA) - ✅ UPDATED: Uses Global Hit Count
+// 4. HEALING ACCURACY (AHA)
     aha: (() => {
-      // Only count items where an SOP was actually matched
-      const matched = activeIncidents.filter(i => i.sop_match_id);
+      // 1. Get the Total "At-Bats" (Total times SOPs were triggered globally)
+      const totalGlobalAttempts = data.metrics?.totalOps || 0;
 
-      if (matched.length === 0) return 100; // Default to 100 if no matches yet
+      // 2. Get the Total "Home Runs" (Total successful heals from the Live Feed)
+      // CAUTION: This might be lower than global truth if Live Feed is only 24h.
+      // Ideally, you'd fetch 'total_healed_count' from the server too.
+      // For now, we compare against the visible active incidents for a "Session Accuracy".
 
-      const healed = matched.filter(i => i.status?.includes('AUTO_HEALED')).length;
-      return Math.round((healed / matched.length) * 100);
+      // OPTION B (Better for Dashboard): "Session Accuracy"
+      // We only look at the tickets currently loaded in the dashboard to avoid mismatch.
+
+      // Denominator: How many tickets in this list have an SOP match?
+      const sessionAttempts = activeIncidents.filter(i =>
+          (i.sop_match_id && i.sop_match_id !== 'null') ||
+          (i.resolved_by_sop_id && i.resolved_by_sop_id !== 'null')
+      ).length;
+
+      // Numerator: How many of THOSE were Auto-Healed?
+      const sessionWins = activeIncidents.filter(i =>
+          i.status && i.status.toUpperCase().includes('AUTO_HEALED')
+      ).length;
+
+      // Safety
+      if (sessionAttempts === 0) return 100; // Default to 100 if idle
+
+      // Calculation
+      return Math.round((sessionWins / sessionAttempts) * 100);
     })()
-};
+
+  };
 
   // Add a second listener for the reports table
-const reportSubscription = supabase
-  .channel('reports-feed')
-  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'incident_reports' }, () => {
-      invalidateAll(); // This will re-run your load function and update recentReports
-  })
-  .subscribe();
+  const reportSubscription = supabase
+    .channel('reports-feed')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'incident_reports' }, () => {
+        invalidateAll();
+    })
+    .subscribe();
 </script>
 
 <div class="min-h-screen bg-[#050505] text-slate-300 font-sans selection:bg-orange-500/30 p-6 lg:p-12 relative">
@@ -314,7 +335,7 @@ const reportSubscription = supabase
 
   <div class="mb-12"><CommandDeck /></div>
 
-  <div class="grid lg:grid-cols-3 gap-6 h-[1000px]">
+  <div class="grid lg:grid-cols-3 gap-6 h-[1000x]">
 
     <div class="lg:col-span-2 h-full flex flex-col">
         <LiveFeed incidents={activeIncidents} on:viewLogs={handleViewLogs} />

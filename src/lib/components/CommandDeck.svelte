@@ -14,9 +14,11 @@
   import { fade, fly } from 'svelte/transition';
 
   // --- CONFIGURATION ---
-  const MAKE_WEBHOOK_URL = "https://hook.eu2.make.com/b9a1nrhy9osjo749t8g0c1mcnkoostxk";
+  // CRITICAL CHANGE: We hit our OWN Server, not Make directly.
+  // The Server handles the keys and forwarding.
+  const API_ENDPOINT = "/api/incidents/ingest";
 
-  // --- DATA: THE 12 SCENARIOS (NORMALIZED) ---
+  // --- DATA: THE 12 SCENARIOS (FLATTENED) ---
   const scenarios = [
     // --- CATEGORY 1: SUPPORT TICKETS (Blue) ---
     {
@@ -28,15 +30,14 @@
       border: 'border-blue-500/20',
       desc: 'User reports 403 Forbidden on password reset (Low Priority).',
       payload: {
-        input: {
-          meta: { ref_id: "TKT-2026-881", origin: "foxops_portal", priority: "LOW" },
-          identity: { user_email: "sarah.j@logistics-co.com", user_company: "Logistics Co.", user_name: "Sarah Jenkins", user_id: "CLI-LOG-09" },
-          incident: {
-            title: "Cannot reset password",
-            timestamp: new Date().toISOString(),
-            raw: "User reports receiving 403 Forbidden when clicking the reset link sent to email. Browser: Chrome 120."
-          }
-        }
+        origin: "foxops_portal",
+        priority: "LOW",
+        user_email: "sarah.j@logistics-co.com",
+        user_company: "Logistics Co.",
+        user_name: "Sarah Jenkins",
+        user_id: "CLI-LOG-09",
+        incident_title: "Cannot reset password",
+        incident_raw: "User reports receiving 403 Forbidden when clicking the reset link sent to email. Browser: Chrome 120."
       }
     },
     {
@@ -48,15 +49,14 @@
       border: 'border-blue-500/20',
       desc: 'Client staging environment failing schema validation (Medium Priority).',
       payload: {
-        input: {
-          meta: { ref_id: "TKT-2026-882", origin: "foxops_portal", priority: "MEDIUM" },
-          identity: { user_email: "devops@fabricam.com", user_company: "Fabricam Inc.", user_name: "Dave Tech", user_id: "CLI-FAB-22" },
-          incident: {
-            title: "Webhook endpoints returning 500",
-            timestamp: new Date().toISOString(),
-            raw: "Our staging environment cannot post to your API. Error message: 'Schema validation failed for field: quantity'."
-          }
-        }
+        origin: "foxops_portal",
+        priority: "MEDIUM",
+        user_email: "devops@fabricam.com",
+        user_company: "Fabricam Inc.",
+        user_name: "Dave Tech",
+        user_id: "CLI-FAB-22",
+        incident_title: "Webhook endpoints returning 500",
+        incident_raw: "Our staging environment cannot post to your API. Error message: 'Schema validation failed for field: quantity'."
       }
     },
     {
@@ -68,15 +68,14 @@
       border: 'border-blue-500/20',
       desc: 'Production halted due to false plan expiry (High Priority).',
       payload: {
-        input: {
-          meta: { ref_id: "TKT-2026-883", origin: "foxops_portal", priority: "HIGH" },
-          identity: { user_email: "finance@global-parts.com", user_company: "Global Parts", user_name: "Finance Dept", "user_id": "CLI-GLO-01" },
-          incident: {
-            title: "URGENT: Subscription Suspended Error",
-            timestamp: new Date().toISOString(),
-            raw: "Production halted. Dashboard says 'Plan Expired' but payment went through yesterday. Transaction ID: TX-9992."
-          }
-        }
+        origin: "foxops_portal",
+        priority: "HIGH",
+        user_email: "finance@global-parts.com",
+        user_company: "Global Parts",
+        user_name: "Finance Dept",
+        user_id: "CLI-GLO-01",
+        incident_title: "URGENT: Subscription Suspended Error",
+        incident_raw: "Production halted. Dashboard says 'Plan Expired' but payment went through yesterday. Transaction ID: TX-9992."
       }
     },
 
@@ -90,15 +89,14 @@
       border: 'border-purple-500/20',
       desc: 'OpenAI 429 Error triggered in Scenario B (High Priority).',
       payload: {
-        input: {
-          meta: { ref_id: "ERR-MAKE-429", origin: "make_scenario_b", priority: "HIGH" },
-          identity: { user_email: "admin@fabalos.com", user_company: "Fabalos Automation", user_name: "Make Bot", user_id: "SYS-MAKE-01" },
-          incident: {
-            title: "HTTP 429: Rate Limit Exceeded",
-            timestamp: new Date().toISOString(),
-            raw: "Module: OpenAI GPT-4 // Bundle: 1 // Error: 429 Too Many Requests. Retry-After: 20s. // Scenario ID: 554321."
-          }
-        }
+        origin: "make_scenario_b",
+        priority: "HIGH",
+        user_email: "admin@fabalos.com",
+        user_company: "Fabalos Automation",
+        user_name: "Make Bot",
+        user_id: "SYS-MAKE-01",
+        incident_title: "HTTP 429: Rate Limit Exceeded",
+        incident_raw: "Module: OpenAI GPT-4 // Bundle: 1 // Error: 429 Too Many Requests. Retry-After: 20s. // Scenario ID: 554321."
       }
     },
     {
@@ -110,15 +108,14 @@
       border: 'border-purple-500/20',
       desc: 'Missing variable in JSON parser causing validation fail (Medium Priority).',
       payload: {
-        input: {
-          meta: { ref_id: "ERR-MAKE-MAP", origin: "make_scenario_a", priority: "MEDIUM" },
-          identity: { user_email: "system@fabalos.com", user_company: "Fabalos Internal", user_name: "Data Processor", user_id: "SYS-MAKE-02" },
-          incident: {
-            title: "Missing Variable in JSON Parser",
-            timestamp: new Date().toISOString(),
-            raw: "RuntimeError: validation failed. Missing value for required field 'client_id' in bundle 4. Input payload size: 2kb."
-          }
-        }
+        origin: "make_scenario_a",
+        priority: "MEDIUM",
+        user_email: "system@fabalos.com",
+        user_company: "Fabalos Internal",
+        user_name: "Data Processor",
+        user_id: "SYS-MAKE-02",
+        incident_title: "Missing Variable in JSON Parser",
+        incident_raw: "RuntimeError: validation failed. Missing value for required field 'client_id' in bundle 4. Input payload size: 2kb."
       }
     },
     {
@@ -130,15 +127,14 @@
       border: 'border-purple-500/20',
       desc: 'Google Sheets connection timed out after 60s (Low Priority).',
       payload: {
-        input: {
-          meta: { ref_id: "ERR-MAKE-TIMEOUT", origin: "make_scenario_c", priority: "LOW" },
-          identity: { user_email: "logs@fabalos.com", user_company: "Fabalos R&D", user_name: "Webhook Listener", "user_id": "SYS-MAKE-03" },
-          incident: {
-            title: "Google Sheets Connection Timed Out",
-            timestamp: new Date().toISOString(),
-            raw: "ConnectionError: The operation timed out after 60000ms. Retrying... Success on attempt 2."
-          }
-        }
+        origin: "make_scenario_c",
+        priority: "LOW",
+        user_email: "logs@fabalos.com",
+        user_company: "Fabalos R&D",
+        user_name: "Webhook Listener",
+        user_id: "SYS-MAKE-03",
+        incident_title: "Google Sheets Connection Timed Out",
+        incident_raw: "ConnectionError: The operation timed out after 60000ms. Retrying... Success on attempt 2."
       }
     },
 
@@ -152,15 +148,14 @@
       border: 'border-orange-500/20',
       desc: 'Festo Sensor reporting 3.2 bar (Threshold 4.0) - Critical.',
       payload: {
-        input: {
-          meta: { ref_id: "IOT-PNU-001", origin: "festo_cp_factory", priority: "CRITICAL" },
-          identity: { user_email: "maint+station1@fabalos.com", user_company: "Festo Plant A", user_name: "Station 01 Controller", user_id: "PLC-S01" },
-          incident: {
-            title: "Pressure Drop Detected - Main Line",
-            timestamp: new Date().toISOString(),
-            raw: "> ERROR_CODE: P-LOW-01 // SENSOR: BP-102 // VALUE: 3.2 bar // THRESHOLD: 4.0 bar // ACTION: EMERGENCY_STOP // Valve V1 closed."
-          }
-        }
+        origin: "festo_cp_factory",
+        priority: "CRITICAL",
+        user_email: "maint+station1@fabalos.com",
+        user_company: "Festo Plant A",
+        user_name: "Station 01 Controller",
+        user_id: "PLC-S01",
+        incident_title: "Pressure Drop Detected - Main Line",
+        incident_raw: "> ERROR_CODE: P-LOW-01 // SENSOR: BP-102 // VALUE: 3.2 bar // THRESHOLD: 4.0 bar // ACTION: EMERGENCY_STOP // Valve V1 closed."
       }
     },
     {
@@ -172,15 +167,14 @@
       border: 'border-orange-500/20',
       desc: 'Conveyor motor reached 85°C (High Priority).',
       payload: {
-        input: {
-          meta: { ref_id: "IOT-MTR-099", origin: "festo_cp_factory", priority: "HIGH" },
-          identity: { user_email: "maint+station4@fabalos.com", user_company: "Festo Plant B", user_name: "Conveyor Belt 4", user_id: "PLC-S04" },
-          incident: {
-            title: "Motor Temp Warning",
-            timestamp: new Date().toISOString(),
-            raw: "> ERROR_CODE: T-HIGH-99 // SENSOR: TM-500 // VALUE: 85°C // STATE: WARNING // RPM: 1200 // Suggested Check: Fan Filter."
-          }
-        }
+        origin: "festo_cp_factory",
+        priority: "HIGH",
+        user_email: "maint+station4@fabalos.com",
+        user_company: "Festo Plant B",
+        user_name: "Conveyor Belt 4",
+        user_id: "PLC-S04",
+        incident_title: "Motor Temp Warning",
+        incident_raw: "> ERROR_CODE: T-HIGH-99 // SENSOR: TM-500 // VALUE: 85°C // STATE: WARNING // RPM: 1200 // Suggested Check: Fan Filter."
       }
     },
     {
@@ -192,15 +186,14 @@
       border: 'border-orange-500/20',
       desc: 'Gateway missed heartbeat for 300s (Medium Priority).',
       payload: {
-        input: {
-          meta: { ref_id: "IOT-NET-002", origin: "festo_iot_gateway", priority: "MEDIUM" },
-          identity: { user_email: "network@fabalos.com", user_company: "Festo Plant A", user_name: "IoT Gateway", user_id: "GTW-01" },
-          incident: {
-            title: "Sensor Heartbeat Missed",
-            timestamp: new Date().toISOString(),
-            raw: "> EVENT: HEARTBEAT_MISS // DEVICE: PROX-S3 // LAST_SEEN: 300s ago // RETRY: Active // Status: Offline."
-          }
-        }
+        origin: "festo_iot_gateway",
+        priority: "MEDIUM",
+        user_email: "network@fabalos.com",
+        user_company: "Festo Plant A",
+        user_name: "IoT Gateway",
+        user_id: "GTW-01",
+        incident_title: "Sensor Heartbeat Missed",
+        incident_raw: "> EVENT: HEARTBEAT_MISS // DEVICE: PROX-S3 // LAST_SEEN: 300s ago // RETRY: Active // Status: Offline."
       }
     },
 
@@ -214,15 +207,14 @@
       border: 'border-emerald-500/20',
       desc: 'Supabase Read Latency spiked to 850ms (Medium Priority).',
       payload: {
-        input: {
-          meta: { ref_id: "HLT-DB-LAT", origin: "supabase_watchdog", priority: "MEDIUM" },
-          identity: { user_email: "admin@fabalos.com", user_company: "Supabase Infra", user_name: "Health Monitor", user_id: "SYS-DB-01" },
-          incident: {
-            title: "DB Read Latency > 500ms",
-            timestamp: new Date().toISOString(),
-            raw: "[WARN] Query execution time: 850ms. Region: sg-1. Active Connections: 45. CPU Load: 78%."
-          }
-        }
+        origin: "supabase_watchdog",
+        priority: "MEDIUM",
+        user_email: "admin@fabalos.com",
+        user_company: "Supabase Infra",
+        user_name: "Health Monitor",
+        user_id: "SYS-DB-01",
+        incident_title: "DB Read Latency > 500ms",
+        incident_raw: "[WARN] Query execution time: 850ms. Region: sg-1. Active Connections: 45. CPU Load: 78%."
       }
     },
     {
@@ -234,15 +226,14 @@
       border: 'border-emerald-500/20',
       desc: 'Public API returning 503 Service Unavailable (Critical).',
       payload: {
-        input: {
-          meta: { ref_id: "HLT-API-DOWN", origin: "uptime_robot", priority: "CRITICAL" },
-          identity: { user_email: "oncall@fabalos.com", user_company: "Fabalos Public API", user_name: "Uptime Bot", user_id: "SYS-API-01" },
-          incident: {
-            title: "API DOWN: https://api.fabalos.com",
-            timestamp: new Date().toISOString(),
-            raw: "Status: 503 Service Unavailable. Response Time: 0ms. Checks failed from: US-West, EU-Central, AS-East."
-          }
-        }
+        origin: "uptime_robot",
+        priority: "CRITICAL",
+        user_email: "oncall@fabalos.com",
+        user_company: "Fabalos Public API",
+        user_name: "Uptime Bot",
+        user_id: "SYS-API-01",
+        incident_title: "API DOWN: https://api.fabalos.com",
+        incident_raw: "Status: 503 Service Unavailable. Response Time: 0ms. Checks failed from: US-West, EU-Central, AS-East."
       }
     },
     {
@@ -254,15 +245,14 @@
       border: 'border-emerald-500/20',
       desc: 'Certificate expiring in 29 days (Low Priority).',
       payload: {
-        input: {
-          meta: { ref_id: "HLT-SSL-EXP", origin: "cert_manager", priority: "LOW" },
-          identity: { user_email: "webmaster@fabalos.com", user_company: "Fabalos Domains", user_name: "SSL Checker", user_id: "SYS-SSL-01" },
-          incident: {
-            title: "SSL Certificate Expiry Warning",
-            timestamp: new Date().toISOString(),
-            raw: "Domain: fabaverse.net. Expires in: 29 days. Issuer: Let's Encrypt. Auto-renew: Enabled."
-          }
-        }
+        origin: "cert_manager",
+        priority: "LOW",
+        user_email: "webmaster@fabalos.com",
+        user_company: "Fabalos Domains",
+        user_name: "SSL Checker",
+        user_id: "SYS-SSL-01",
+        incident_title: "SSL Certificate Expiry Warning",
+        incident_raw: "Domain: fabaverse.net. Expires in: 29 days. Issuer: Let's Encrypt. Auto-renew: Enabled."
       }
     }
   ];
@@ -287,7 +277,7 @@
 
   const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-  // --- THE REAL INJECTOR (HITS MAKE.COM) ---
+  // --- THE REAL INJECTOR (HITS SERVER API) ---
   async function injectFault() {
     if (loading) return;
     loading = true;
@@ -299,27 +289,28 @@
     logs = [...logs, `> PACKING_PAYLOAD: ${JSON.stringify(activeScenario.payload).length} bytes`];
 
     try {
-      logs = [...logs, `> CONNECTING: hook.eu2.make.com...`];
+      logs = [...logs, `> CONNECTING: ${API_ENDPOINT}...`];
 
-      // 2. EXECUTION: The Real Network Call
-      const response = await fetch(MAKE_WEBHOOK_URL, {
+      // 2. EXECUTION: The Real Network Call to YOUR Server
+      const response = await fetch(API_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        // We now send the FLAT structure directly to the server
         body: JSON.stringify(activeScenario.payload)
       });
 
       if (!response.ok) {
-        throw new Error(`Make API Error: ${response.status} ${response.statusText}`);
+        throw new Error(`Server API Error: ${response.status} ${response.statusText}`);
       }
 
-      const responseText = await response.text();
+      const responseJson = await response.json();
 
       // 3. SUCCESS: Engine Started
       logs = [...logs, `> 200 OK: Packet Accepted`];
-      logs = [...logs, `> SERVER_ACK: "${responseText.substring(0, 50)}..."`];
-      logs = [...logs, `> TRIGGER: Make Scenario Started...`];
+      logs = [...logs, `> SERVER_ID: ${responseJson.id}`];
+      logs = [...logs, `> UPSTREAM_ACK: "Forwarded to Make.com"`];
 
       success = true;
 
@@ -402,8 +393,8 @@
 
         <div class="space-y-2">
           <div class="flex items-center justify-between text-xs text-slate-500 uppercase tracking-widest font-bold">
-            <span>Payload Preview</span>
-            <span class="text-emerald-500">JSON Valid</span>
+            <span>Payload Preview (FLAT JSON)</span>
+            <span class="text-emerald-500">Ready</span>
           </div>
           <div class="p-4 rounded-lg bg-[#050505] border border-slate-800 font-mono text-xs text-blue-300 overflow-x-auto">
             <pre>{JSON.stringify(activeScenario.payload, null, 2)}</pre>
@@ -432,7 +423,7 @@
             <CheckCircle2 size={20} />
             <div>
               <div class="font-bold text-sm">Fault Injected Successfully</div>
-              <div class="text-xs opacity-80">Row created in DB. Watch the dashboard!</div>
+              <div class="text-xs opacity-80">Server acknowledged. Check your Dashboard.</div>
             </div>
           </div>
         {/if}
@@ -465,9 +456,8 @@
   </div>
 {/if}
 
-
-      <div class="mt-10 flex gap-4">
-        <a href="/support" target="_blank" class="px-6 py-3 border border-slate-700 hover:border-slate-500 text-slate-300 font-bold rounded transition-all">
-          Submit Tickets Here
-        </a>
-      </div>
+<div class="mt-10 flex gap-4">
+  <a href="/support" target="_blank" class="px-6 py-3 border border-slate-700 hover:border-slate-500 text-slate-300 font-bold rounded transition-all">
+    Submit Tickets Here
+  </a>
+</div>

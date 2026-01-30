@@ -23,22 +23,45 @@
 
   // --- JSON DATA ---
   const toolDefinition = {
-    "name": "match_sops",
-    "description": "Finds the correct Standard Operating Procedure",
-    "input_schema": {
-      "type": "object",
-      "properties": {
-        "error_vector": {
-          "type": "string",
-          "description": "The raw error log from the machine"
-        },
-        "severity": {
-          "type": "string",
-          "enum": ["LOW", "CRITICAL"]
-        }
-      }
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Initiate Triage Arguments",
+  "type": "object",
+  "properties": {
+    "search_query": {
+      "type": "string",
+      "description": "A precise, semantic search query derived from the raw telemetry."
+    },
+    "clean_title": {
+      "type": "string",
+      "description": "A standardized, professional title for the incident report."
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL"
+      ],
+      "description": "Severity level of the incident."
+    },
+    "detected_domain": {
+      "type": "string",
+      "description": "The suspected origin system (e.g., 'Stripe', 'Supabase', 'AWS')."
+    },
+    "logic_reasoning": {
+      "type": "string",
+      "description": "Brief technical justification for why this priority level was assigned."
     }
-  };
+  },
+  "required": [
+    "search_query",
+    "clean_title",
+    "priority",
+    "logic_reasoning"
+  ],
+  "additionalProperties": false
+}
 
   let activeSection = 'executive-summary';
 
@@ -298,7 +321,7 @@
           <div class="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent pointer-events-none"></div>
 
           <img
-            src="/flowchart.png"
+            src="/flowchart.svg"
             alt="FoxOps Architecture Flowchart"
             class="relative z-10 w-full h-auto max-w-5xl rounded-lg shadow-lg filter invert brightness-125 contrast-125 opacity-90"
           />

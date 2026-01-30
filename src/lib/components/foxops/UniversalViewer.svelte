@@ -7,13 +7,48 @@
 
     const dispatch = createEventDispatcher();
 
+    // SENIOR LOGIC: Deep Extraction & Cleaning
+    // This handles both Flat rows and Nested JSON structures automatically.
+    $: viewData = (() => {
+        if (!item) return { html: null, title: 'SYSTEM REPORT' };
+
+        // 1. EXTRACT: Check deeply nested paths based on your JSON structure
+        const candidateHtml =
+            item.html_report ||                   // Flat
+            item.report_html ||                   // Flat (alt)
+            item.incident?.html_report ||         // Nested (Your specific case)
+            item.incident?.report_html ||         // Nested (alt)
+            item.body;
+
+        const candidateTitle =
+            item.sop_title ||
+            item.title ||
+            item.incident?.sop_title ||           // Nested Title
+            item.incident?.title ||               // Nested Title
+            'SYSTEM REPORT';
+
+        if (!candidateHtml) return { html: null, title: candidateTitle };
+
+        // 2. CLEAN: Un-escape the string if it's double-encoded (fixing the \n and \" mess)
+        let cleanHtml = candidateHtml;
+        if (typeof cleanHtml === 'string') {
+            // Fix newlines and escaped quotes so the browser renders it as HTML, not text
+            cleanHtml = cleanHtml
+                .replace(/\\n/g, '')       // Remove escaped newlines
+                .replace(/\\"/g, '"')      // Fix escaped quotes
+                .replace(/^"|"$/g, '');    // Remove wrapping quotes if present
+        }
+
+        return { html: cleanHtml, title: candidateTitle };
+    })();
+
     function close() {
       dispatch('close');
     }
 
     function openRaw() {
       if (!item) return;
-      const content = mode === 'report' ? (item.report_html || '<h1>No Content</h1>') : JSON.stringify(item, null, 2);
+      const content = mode === 'report' ? (viewData.html || '<h1>No Content</h1>') : JSON.stringify(item, null, 2);
       const type = mode === 'report' ? 'text/html' : 'application/json';
       const blob = new Blob([content], { type });
       const url = URL.createObjectURL(blob);
@@ -34,10 +69,10 @@
            </div>
            <div>
               <h2 class="text-sm font-bold text-white uppercase tracking-widest">
-                  {mode === 'report' ? (item.sop_used || 'SYSTEM REPORT') : 'INCIDENT LOGS'}
+                  {mode === 'report' ? viewData.title : 'INCIDENT LOGS'}
               </h2>
               <div class="flex items-center gap-2 text-[10px] font-mono text-slate-500 mt-0.5">
-                 <span>ID: {item.id?.slice(0,8)}</span>
+                 <span>ID: {item.id?.slice(0,8) || item.incident?.id?.slice(0,8) || 'Unknown'}</span>
               </div>
            </div>
         </div>
@@ -46,15 +81,16 @@
         </button>
       </div>
 
-      <div class="flex-1 overflow-y-auto p-0 bg-[#0B1121]">
+      <div class="flex-1 overflow-y-auto p-0 bg-[#0B1121] text-slate-300">
          {#if mode === 'report'}
              <div class="prose prose-invert prose-sm max-w-none p-8">
-                 {#if item.report_html}
-                    {@html item.report_html}
+                 {#if viewData.html}
+                    {@html viewData.html}
                  {:else}
                     <div class="flex flex-col items-center justify-center h-full text-slate-600 gap-4 mt-12">
                        <Archive size={48} class="opacity-20" />
-                       <p class="font-mono text-sm">No detailed HTML content available.</p>
+                       <p class="font-mono text-sm">No formatted HTML found.</p>
+                       <p class="text-[10px] text-slate-700">System checked: item.incident.html_report</p>
                     </div>
                  {/if}
              </div>

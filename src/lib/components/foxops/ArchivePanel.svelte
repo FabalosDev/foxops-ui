@@ -26,10 +26,12 @@
             <FileText size={14} />
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-xs font-bold text-slate-300 truncate group-hover:text-white">{report.sop_used || 'Unknown SOP'}</p>
+            <p class="text-xs font-bold text-slate-300 truncate group-hover:text-white">
+                {report.sop_title || report.sop_snapshot_title || 'Unknown Procedure'}
+            </p>
             <div class="flex items-center gap-2 mt-1">
               <span class="text-[10px] font-mono text-slate-600 flex items-center gap-1">
-                <Clock size={8}/> {new Date(report.archived_at).toLocaleTimeString()}
+                <Clock size={8}/> {new Date(report.created_at).toLocaleTimeString()}
               </span>
               <span class="text-slate-700">•</span>
               <span class="text-[10px] text-emerald-500 flex items-center gap-1">Verified</span>

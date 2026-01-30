@@ -1,28 +1,23 @@
 <script lang="ts">
-  import { Cpu, Terminal, Zap, Activity, Database, LayoutDashboard } from 'lucide-svelte';
+  import { Cpu, Terminal, Zap, Activity, LayoutDashboard } from 'lucide-svelte';
 
-  const webhookUrl = "https://hook.eu2.make.com/b9a1nrhy9osjo749t8g0c1mcnkoostxk";
+  // --- CONFIGURATION ---
+  // Hitting local server endpoint
+  const API_ENDPOINT = "/api/incidents/ingest";
 
+  // --- DATA: FLATTENED PAYLOAD ---
+  // No more nested "input.meta.identity". Just flat keys.
   const payload = {
-  "input": {
-    "meta": {
-      "ref_id": "FAB-IND-01-20260127",
-      "origin": "foxops_portal",
-      "priority": "HIGH"
-    },
-    "identity": {
-      "user_email": "demo+festo@fabalos.com",
-      "user_company": "Festo Industrial Plant",
-      "user_name": "FoxOps Demo User",
-      "user_id": "FAB-IND-01"
-    },
-    "incident": {
-      "title": "Actuator Cycle Timeout - Station 04",
-      "timestamp": "2026-01-27T21:40:00Z",
-      "raw": "> ERROR_CODE: E-2044 // LATENCY_DETECTED: 450ms // COMPONENT: VUVG-L10-B52 // STATE: INCOMPLETE_STROKE // Pneumatic pressure nominal (6.2 bar) but proximity sensor S3 failed to trigger within window."
-    }
-  }
-};
+    origin: "foxops_portal",
+    priority: "HIGH",
+    user_email: "demo+festo@fabalos.com",
+    user_company: "Festo Industrial Plant",
+    user_name: "FoxOps Demo User",
+    user_id: "FAB-IND-01",
+    incident_title: "Actuator Cycle Timeout - Station 04",
+    incident_raw: "> ERROR_CODE: E-2044 // LATENCY_DETECTED: 450ms // COMPONENT: VUVG-L10-B52 // STATE: INCOMPLETE_STROKE // Pneumatic pressure nominal (6.2 bar) but proximity sensor S3 failed to trigger within window.",
+    timestamp: "2026-01-27T21:40:00Z"
+  };
 
   let loading = false;
   let status = "";
@@ -30,15 +25,23 @@
   async function sendToMainEngine() {
     loading = true;
     status = "Transmitting Simulation Payload...";
+
     try {
-      const response = await fetch(webhookUrl, {
+      // Hit our own server endpoint
+      const response = await fetch(API_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-      status = response.ok ? "✅ Injection Successful: Core Updated" : "❌ Engine Error: " + response.statusText;
+
+      if (response.ok) {
+        const data = await response.json();
+        status = `✅ Injection Successful: ID ${data.id}`;
+      } else {
+        status = `❌ Server Error: ${response.statusText}`;
+      }
     } catch (err) {
-      status = "❌ Connection Failed";
+      status = "❌ Network Connection Failed";
     } finally {
       loading = false;
     }
@@ -65,7 +68,7 @@
       <div class="sticky top-32 space-y-6">
         <div class="p-4 rounded-lg bg-orange-500/5 border border-orange-500/10">
           <p class="text-[10px] font-bold uppercase tracking-widest text-orange-500 mb-2">Active Protocol</p>
-          <p class="text-xs text-slate-400 leading-relaxed">Sending raw error directly to the Webhook.</p>
+          <p class="text-xs text-slate-400 leading-relaxed">Sending flat telemetry to Server API.</p>
         </div>
         <nav class="space-y-1 text-sm">
           <div class="px-4 py-2 text-white font-bold bg-white/5 rounded-lg flex items-center gap-3 italic">
@@ -88,7 +91,7 @@
         </div>
 
         <div class="bg-black/50 rounded-lg border border-slate-800 p-6 mb-8 relative">
-          <div class="absolute top-2 right-4 text-[10px] font-mono text-slate-600 uppercase">Buffer_v4.2</div>
+          <div class="absolute top-2 right-4 text-[10px] font-mono text-slate-600 uppercase">Buffer_v5.0 (Flat)</div>
           <pre class="text-xs md:text-sm font-mono text-orange-400/80 overflow-x-auto whitespace-pre-wrap">{JSON.stringify(payload, null, 2)}</pre>
         </div>
 
