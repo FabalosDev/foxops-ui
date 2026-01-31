@@ -1,52 +1,62 @@
-# 🦊 FoxOps // SENTINEL
-
-**The "Context Healer" for Fabalos OS.**
-
-FoxOps is a secure, session-scoped interface that allows users to intervene when an automation workflow fails. Instead of dying silently in a log file, the system redirects the user to this "Recovery Room" to fix their data in real-time.
-
-### ⚡ Technical Stack
-- **Frontend:** SvelteKit (Vercel Adapter)
-- **State/Auth:** Supabase Realtime + Row Level Security
-- **Orchestration:** Make.com (Master Scenario)
-- **Intelligence:** Google Gemini 1.5 Pro via Vertex AI
-
-> Part of the **Master of Make 2026** Submission.
-
-# 🦊 FoxOps: Autonomous Industrial Remediation Engine
+# 🦊 FoxOps: Universal Autonomous Incident Response Engine
 
 ![Status](https://img.shields.io/badge/STATUS-STABLE-success?style=for-the-badge)
 ![Lane](https://img.shields.io/badge/LANE-1_CAREER-blue?style=for-the-badge)
 ![Version](https://img.shields.io/badge/VERSION-1.0.0-orange?style=for-the-badge)
 
 > **"If it’s not documented, it didn’t happen."**
-> Bridging AI Reasoning (Gemini) with Industrial Execution (Make + MCP) to turn silent failures into auditable assets.
+> The "Context Healer" for Fabalos OS. Bridging AI Reasoning (Gemini) with Industrial Execution (Make + MCP) to turn silent failures into auditable assets.
 
 ---
 
 ## 1. Executive Summary
 
-**FoxOps** is a closed-loop automation architecture designed to detect, analyze, and resolve industrial mechatronic failures in real-time. Unlike passive logging systems, FoxOps actively executes **"Self-Healing Cycles"** using Vector Search for SOP matching and deterministic logic for incident reporting.
+**FoxOps** is a universal autonomous incident response system designed to detect, analyze, and resolve technical failures across **ANY** domain—from industrial sensors and RPA bots to API gateways and Cloud infrastructure.
 
-This repository contains the **Frontend Dashboard**, built with **SvelteKit**, which visualizes the real-time remediation process and renders forensic forensic PDF reports.
+Unlike passive logging tools, FoxOps actively executes **"Self-Healing Cycles"**. It uses Vector Search to match error signatures against a knowledge base of Standard Operating Procedures (SOPs), executes the fix via Make.com, and auto-generates forensic documentation.
 
-## 2. Technical Stack
-
-* **Orchestration:** Make.com (Webhooks, Logic Routing)
-* **Database:** Supabase (PostgreSQL, pgvector, Auth)
-* **Frontend:** SvelteKit (Real-time Dashboard, PDF Rendering)
-* **Intelligence:** AI Analyst (Contextual Reasoning) + Vector Embeddings
-* **Runtime:** JavaScript (Code Nodes for Data Transformation)
+**The Core Philosophy:** The system doesn't care *where* the error comes from. If it generates an error message, FoxOps can triage it, fix it, and document it.
 
 ---
 
-## 3. Data Flow Architecture
+## 2. Universal Error Intelligence
 
-The system operates on a linear, idempotent pipeline:
+FoxOps operates as a central nervous system for technical infrastructure, handling distinct failure classes with a single engine:
 
-### Phase A: Ingestion & Sanitization
-1.  **IoT Trigger:** Edge devices send raw error logs (containing control characters, CRLF, unescaped quotes) to the Make.com Webhook.
-2.  **Transport Layer Sanitization:**
-    * Raw payloads are passed through a **Native JSON Serialization Module**.
+| Domain | Error Type | Auto-Heal Strategy |
+| :--- | :--- | :--- |
+| 🏭 **Industrial** | `Pressure < 4.0 bar` | Trigger Maintenance Stop SOP |
+| 🤖 **RPA Bots** | `ElementNotFound` | Execute Fallback Selector Logic |
+| ☁️ **DevOps** | `503 Service Unavailable` | Restart Service / Scale Resources |
+| 🔐 **Security** | `403 Unauthorized` | Revoke Token & Log Incident |
+| 💳 **FinTech** | `Webhook Sig Mismatch` | Request Re-signing / Alert Ops |
+
+---
+
+## 3. Technical Stack
+
+| Layer | Technology | Function |
+| :--- | :--- | :--- |
+| **Edge Compute** | **Cloudflare Workers** | **Traffic Sanitization & Pre-processing** |
+| **Frontend** | SvelteKit (Vercel) | Real-time Dashboard & PDF Rendering |
+| **Orchestration** | Make.com | Master Scenario & Logic Routing |
+| **Database** | Supabase | PostgreSQL + pgvector (Knowledge Base) |
+| **Auth** | Supabase Auth | Row Level Security (RLS) & Server Hooks |
+| **Intelligence** | Gemini 1.5 Pro | Reasoning Agent via Vertex AI |
+
+---
+
+## 4. Data Flow Architecture
+
+The system operates on a linear, idempotent pipeline designed to handle "dirty" industrial data without crashing.
+
+### Phase A: Ingestion & Edge Sanitization
+1.  **IoT Trigger:** Edge devices send raw error logs (often containing control characters, CRLF, and unescaped quotes).
+2.  **🛡️ Cloudflare Sentinel (Pre-processing):**
+    * Incoming webhooks hit a dedicated Cloudflare Worker *before* reaching the orchestration layer.
+    * **Action:** Strips unwanted metadata, blocks malformed payloads, and sanitizes headers to ensure only valid JSON enters the pipeline.
+3.  **Transport Layer Normalization:**
+    * Validated payloads are passed to the Make.com Native JSON Serialization Module.
     * *Purpose:* Automatically escapes `\n`, `\t`, and `"` to prevent JSON syntax violations (RFC 8259 compliance).
 
 ### Phase B: Logic & Analysis
@@ -60,7 +70,7 @@ The system operates on a linear, idempotent pipeline:
 
 ### Phase C: Persistence & Lifecycle
 1.  **Active Operations (`public.incidents`):**
-    * Stores live/ongoing issues. Optimized for high-speed dashboard queries.
+    * Stores live/ongoing issues. Optimized for high-speed dashboard queries via Supabase Realtime.
 2.  **Compliance Archival (`public.incident_reports`):**
     * *Trigger:* Only when Status = `RESOLVED`.
     * The finalized HTML report and SOP snapshot are committed to cold storage.
@@ -68,9 +78,26 @@ The system operates on a linear, idempotent pipeline:
 
 ---
 
-## 4. Key Technical Features
+## 5-Layer "Omnichannel" Ingestion
+FoxOps doesn't just listen to one stream. It monitors the entire operational reality across four dimensions:
 
-### 🛡️ Transport-Layer Integrity
+| Dimension | Entry Point | Example Scenario |
+| :--- | :--- | :--- |
+| 👤 **Human Layer** | **Support Portal** | Operator reports "Conveyor belt vibration" via web UI. |
+| 🧠 **Logic Layer** | **Workflow Handler** | Make.com scenario fails due to API Rate Limit (429). |
+| 🏭 **Physical Layer** | **IoT Sensors** | Festo Pressure Sensor drops below 4.0 bar critical threshold. |
+| 💓 **Vital Layer** | **Health Pings** | Cron job detects Supabase Database latency > 200ms. |
+
+**Result:** Whether it's a broken machine, a confused user, a crashed script, or a network outage—FoxOps catches it.
+
+---
+
+## 6. Key Technical Features
+
+### 🛡️ Edge-Layer Data Scrubbing (Cloudflare)
+To protect the automation engine from "Garbage In, Garbage Out," a Cloudflare Worker acts as the gatekeeper. It intercepts raw TCP streams from industrial controllers, removing non-compliant characters and enforcing schema validation before the data ever consumes a Make.com operation.
+
+### ⚡ Transport-Layer Integrity
 Implemented a "No-Code" Native JSON serializer to handle multi-line mechatronic SOPs. This eliminates "Bad Control Character" errors common in legacy industrial data, ensuring 100% payload delivery to the frontend.
 
 ### 📄 Server-Side Forensic Reporting
@@ -78,14 +105,9 @@ The system generates a styled, legal-grade HTML report within the orchestration 
 * **Benefit:** The SvelteKit frontend simply renders the HTML string (`{@html incident.html_report}`).
 * **Output:** Ready-to-print PDF format with timestamps, severity levels, and validation hashes.
 
-### ♻️ Database Normalization Strategy
-Separation of concerns between **Operational Data** (Live) and **Forensic Data** (Archive).
-* **`incidents` table:** Lightweight, JSONB payloads.
-* **`incident_reports` table:** Heavyweight, TEXT-based HTML storage.
-
 ---
 
-## 5. API Payload Specification
+## 7. API Payload Specification
 
 The SvelteKit frontend receives the following standardized JSON structure via the Webhook Response:
 
@@ -110,3 +132,9 @@ The SvelteKit frontend receives the following standardized JSON structure via th
     "generated_at": "2026-01-27T10:00:00.000Z"
   }
 }
+
+```
+---
+
+> **Part of the Master of Make 2026 Submission.**
+> *Architected by Fabalos.*

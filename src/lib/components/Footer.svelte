@@ -14,7 +14,6 @@
   const links = {
     platform: [
       { href: '/make-challenge', label: 'Challenge Manifesto' },
-      { href: '/support', label: 'Live Ticket System' },
       { href: 'https://fabalos.com', label: 'Fabalos Automation' }
     ]
   };

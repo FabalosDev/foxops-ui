@@ -28,8 +28,8 @@
         <a href="#demo" class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium text-xs rounded-lg transition-all flex items-center gap-2">
           <PlayCircle size={14} /> <span class="hidden sm:inline">Watch Demo</span>
         </a>
-        <a href="/" class="text-xs font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-wider">Login</a>
         <a href="https://fabalos.com" class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold transition-all uppercase tracking-wider text-emerald-400">Book Audit</a>
+        <a href="/" class="text-xs font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-wider">Login</a>
       </div>
     </div>
   </header>
