@@ -13,6 +13,12 @@ export const POST: RequestHandler = async ({ request }) => {
     const rawData = await request.json();
 
     // 1. Normalize Data (The "Flat" Protocol)
+    const rawErrorText = String(rawData.incident_raw || rawData.incident_description || "No raw telemetry provided.");
+
+    // 🔥 NEW: Deterministic Signature Generation
+    // We create a "Stable" version of the error for Gemini to analyze
+    const stableSignature = normalizeErrorSignature(rawErrorText);
+
     const flatPayload = {
       origin:         String(rawData.origin || "Unknown_Source"),
       priority:       validatePriority(rawData.priority),
@@ -21,9 +27,11 @@ export const POST: RequestHandler = async ({ request }) => {
       user_id:        String(rawData.user_id || "GUEST_USER"),
       user_email:     validateEmail(rawData.user_email),
 
-      // Pass text EXACTLY as received. JSON.stringify handles the safety downstream.
       incident_title: String(rawData.incident_title || "Automation Alert: Undefined Incident"),
-      incident_raw:   String(rawData.incident_raw || rawData.incident_description || "No raw telemetry provided."),
+
+      // ✅ We send BOTH: The raw data for humans, and the normalized signature for AI
+      incident_raw:   rawErrorText,
+      ai_signature:   stableSignature,
 
       timestamp:      rawData.timestamp || new Date().toISOString()
     };
@@ -42,7 +50,6 @@ export const POST: RequestHandler = async ({ request }) => {
 
     const makeResult = await makeResponse.text();
 
-    // 3. Success
     return json({
       status: 'Success',
       id: `${flatPayload.user_id}-${Date.now()}`,
@@ -56,6 +63,30 @@ export const POST: RequestHandler = async ({ request }) => {
 };
 
 // ===== HELPERS =====
+
+/**
+ * Strips variable data (IDs, Timestamps, Hex Codes) from error logs
+ * to ensure Gemini generates consistent Vector Embeddings.
+ */
+function normalizeErrorSignature(text: string): string {
+    return text
+        // Replace Hex Codes (0x45F, 0x1A) -> {HEX}
+        .replace(/0x[0-9a-fA-F]+/g, '{HEX}')
+
+        // Replace UUIDs -> {UUID}
+        .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, '{UUID}')
+
+        // Replace IP Addresses -> {IP}
+        .replace(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g, '{IP}')
+
+        // Replace Timestamps (ISO or Simple) -> {TIME}
+        .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/g, '{TIME}')
+        .replace(/\d{2}:\d{2}:\d{2}/g, '{TIME}')
+
+        // Replace large numbers (IDs) -> {NUM}
+        .replace(/\b\d{5,}\b/g, '{NUM}');
+}
+
 function validateEmail(email: any): string {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(String(email)) ? String(email) : 'admin@fabalos.com';
