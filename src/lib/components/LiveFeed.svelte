@@ -37,22 +37,28 @@
     const from = pageIndex * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
 
-    // A. BUILD QUERY DYNAMICALLY
     let query = supabase
       .from('incidents')
-      .select('*')
+      // ✅ FIX 1: Join 'support_tickets' to get the SOP Match ID
+      .select(`
+          *,
+          support_tickets (
+              id,
+              sop_match_id
+          )
+      `)
       .range(from, to)
-      .order('created_at', { ascending: false });
+      // ✅ FIX 2: Strict Chronological Sort (Newest First)
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false });
 
-    // B. APPLY SERVER-SIDE FILTERS
+    // SERVER-SIDE FILTERS
     if (activeFilter === 'ACTIVE') {
-        // Show everything NOT resolved or healed
         query = query.not('status', 'ilike', '%RESOLVED%')
                      .not('status', 'ilike', '%HEALED%')
                      .not('status', 'ilike', '%OVERRIDE%')
                      .not('status', 'ilike', '%CLOSED%');
     } else if (activeFilter === 'RESOLVED') {
-        // Show only resolved/healed
         query = query.or('status.ilike.%RESOLVED%,status.ilike.%HEALED%,status.ilike.%OVERRIDE%');
     } else if (activeFilter === 'CRITICAL') {
         query = query.eq('priority', 'CRITICAL');
@@ -61,20 +67,17 @@
     const { data, error } = await query;
 
     if (!error && data) {
-      // C. CLIENT-SIDE SORTING (Visual Rank)
-      incidents = data.sort((a, b) => {
-        // Priority Rank
-        const score = (p: string) => {
-          if (!p) return 10;
-          if (p.includes('CRITICAL')) return 0;
-          if (p.includes('HIGH')) return 1;
-          if (p.includes('MEDIUM')) return 2;
-          return 3;
-        };
-        return score(a.priority) - score(b.priority);
-      });
+       // ✅ FIX 3: Flatten data so UI can find the SOP ID easily
+       incidents = data.map(inc => {
+           const ticket = Array.isArray(inc.support_tickets) ? inc.support_tickets[0] : inc.support_tickets;
+           return {
+               ...inc,
+               sop_match_id: ticket?.sop_match_id || null, // Pulling it to the top level
+               linked_ticket_id: ticket?.id || null
+           };
+       });
 
-      hasMore = data.length === PAGE_SIZE;
+       hasMore = data.length === PAGE_SIZE;
     }
 
     loading = false;
@@ -83,7 +86,7 @@
   function changeFilter(newFilter: string) {
       if (activeFilter === newFilter) return;
       activeFilter = newFilter;
-      page = 0; // Reset to first page
+      page = 0;
       fetchIncidents(0);
   }
 
@@ -103,11 +106,9 @@
   onMount(() => {
     fetchIncidents(0);
 
-    // Realtime Listener
     const subscription = supabase
       .channel('live_incidents')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'incidents' }, () => {
-         // Refresh current view on change to keep filter valid
          fetchIncidents(page);
       })
       .subscribe();
@@ -138,19 +139,26 @@
       if (data) availableSops = data;
   }
 
-  function openResolveModal(id: string) {
+  // ✅ FIX 4: Async function ensures SOPs are loaded BEFORE we try to select one
+  async function openResolveModal(id: string) {
       resolvingId = id;
+
+      // 1. Wait for Library Download
+      await fetchSops();
+
+      // 2. Find Incident & Link
       const incident = incidents.find(i => i.id === id);
       resolvingTicketId = incident?.linked_ticket_id || null;
       newSopTitle = "";
       newSopContent = "";
       resolutionNotes = "";
 
+      // 3. Match Logic
       const aiSuggestedId = incident?.sop_match_id;
       const isSopAvailable = availableSops.some(s => s.id === aiSuggestedId);
-      selectedSop = (aiSuggestedId && isSopAvailable) ? aiSuggestedId : "none";
 
-      fetchSops();
+      // 4. Set Dropdown
+      selectedSop = (aiSuggestedId && isSopAvailable) ? aiSuggestedId : "none";
   }
 
   async function resolveIncident(id: string) {
@@ -158,7 +166,6 @@
     if (selectedSop !== 'none' && selectedSop !== 'new') updatePayload.resolved_by_sop_id = selectedSop;
 
     await supabase.from('incidents').update(updatePayload).eq('id', id);
-    // Refresh to update list (might remove item if filter is ACTIVE)
     fetchIncidents(page);
   }
 
@@ -167,7 +174,6 @@
     isReporting = true;
     const reportWebhook = "https://hook.eu2.make.com/mmqk3qu5dg2eyc1zvjsb6vnuq84kv5g7";
 
-    // Simplified Report Generation Logic
     const timestamp = new Date().toISOString();
     let finalSopTitle = incident.title;
     let finalSopContent = "No SOP";
@@ -182,7 +188,7 @@
         technician: technicianName,
         notes: resolutionNotes,
         sop: finalSopTitle,
-        html_report: `` // Placeholder for full HTML gen
+        html_report: ``
     };
 
     try {

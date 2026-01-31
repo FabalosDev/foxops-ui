@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import Footer from '$lib/components/Footer.svelte';
   import {
     Cpu,
     Network,
@@ -83,43 +82,7 @@
 <svelte:window on:scroll={handleScroll} />
 
 
-<div class="min-h-screen bg-[#0F172A] text-slate-300 font-sans selection:bg-orange-500/30">
-
-  <header class="fixed top-0 left-0 w-full z-50 border-b border-slate-800 bg-[#0B1121]/90 backdrop-blur-md transition-all duration-300">
-
-    <div class="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10 pointer-events-none"></div>
-
-    <div class="relative max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
-
-      <div class="flex items-center gap-4">
-        <div class="hidden md:flex h-8 w-8 rounded bg-orange-500/10 items-center justify-center border border-orange-500/20">
-          <Cpu size={18} class="text-orange-500" />
-        </div>
-
-        <div>
-          <div class="flex items-center gap-3">
-            <h1 class="text-sm md:text-lg font-bold tracking-tight text-white leading-tight">
-              FoxOps <span class="text-slate-500">Autonomous Self-Healing Infrastructure & SOP Generation</span>
-            </h1>
-          </div>
-          <div class="flex items-center gap-2 mt-1">
-            <div class="inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-              Make Challenge 2026
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-4 shrink-0">
-        <a href="#demo" class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium text-xs rounded-lg transition-all flex items-center gap-2">
-          <PlayCircle size={14} /> <span class="hidden sm:inline">Watch Demo</span>
-        </a>
-      </div>
-
-    </div>
-  </header>
-
-  <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 pt-28 pb-20">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 pb-20">
 
 <aside class="hidden lg:block lg:col-span-3 relative">
       <div class="sticky top-32 space-y-8">
@@ -530,7 +493,6 @@
 
     </main>
 
-  </div>
+
 </div>
 
-<Footer activeIncidents={[]} />

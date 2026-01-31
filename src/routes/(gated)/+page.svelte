@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
   import { invalidateAll } from '$app/navigation';
   import { supabase } from '$lib/supabaseClient';
-  import type { PageData } from './$types';
+  import type { PageData } from '../$types';
 
   // --- MODULE IMPORTS ---
   import CommandDeck from '$lib/components/CommandDeck.svelte';
@@ -63,23 +63,24 @@
     showSopManager = !showSopManager;
   }
 
-  // --- FETCH LOGIC ---
-  async function fetchIncidents() {
-    const { data, error } = await supabase
-        .from('incidents')
-        .select('*')
-        .order('created_at', { ascending: false });
+// --- FETCH LOGIC ---
+async function fetchIncidents() {
+  const { data, error } = await supabase
+      .from('incidents')
+      .select('*')
+      .order('created_at', { ascending: false }) // Primary Sort: Newest Time
+      .order('id', { ascending: false });        // Tie-breaker: Newest ID
 
-    if (error) {
-        console.error("Error fetching incidents:", error);
-    } else {
-        activeIncidents = (data || []).map(inc => ({
-            ...inc,
-            sop_match_id: inc.sop_match_id || null,
-            linked_ticket_id: inc.linked_ticket_id || null
-        }));
-    }
+  if (error) {
+      console.error("Error fetching incidents:", error);
+  } else {
+      activeIncidents = (data || []).map(inc => ({
+          ...inc,
+          sop_match_id: inc.sop_match_id || null,
+          linked_ticket_id: inc.linked_ticket_id || null
+      }));
   }
+}
 
   // --- LIFECYCLE ---
   onMount(async () => {

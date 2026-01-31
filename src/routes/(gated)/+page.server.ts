@@ -16,7 +16,8 @@ export const load = async () => {
                     sop_match_id
                 )
             `)
-            .order('created_at', { ascending: false });
+.order('created_at', { ascending: false }) // 1st Priority: Time
+.order('id', { ascending: false });        // 2nd Priority: ID (Tie-breaker)
 
         if (error) throw error;
 

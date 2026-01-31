@@ -1,5 +1,5 @@
 <script>
-  import "../app.css"; // Keep this!
+  import '../../app.css';
   import Gatekeeper from "$lib/components/Gatekeeper.svelte";
   let { children } = $props();
 </script>
