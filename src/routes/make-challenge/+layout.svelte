@@ -16,7 +16,7 @@
         </div>
         <div>
           <h1 class="text-sm md:text-lg font-bold tracking-tight text-white leading-tight">
-            FoxOps <span class="text-slate-500">Autonomous Infrastructure</span>
+            FoxOps' <span class="text-slate-500">Autonomous Self-Healing Infrastructure & SOP Generation</span>
           </h1>
           <div class="inline-flex mt-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
             Make Challenge 2026

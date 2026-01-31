@@ -151,24 +151,24 @@
       </div>
     </header>
 
-      <section id="executive-summary" class="scroll-mt-32 space-y-6">
+<section id="executive-summary" class="scroll-mt-32 space-y-6">
         <h2 class="text-2xl font-bold text-white">Executive Summary</h2>
         <p class="text-slate-400 leading-relaxed text-lg">
-          FoxOps is an idempotent, self-healing engine that turns silent failures into auditable assets.
-          It uses <strong>Make</strong> as a Serverless MCP Host to give Gemini 2.0 direct control over industrial infrastructure.
+          FoxOps' Autonomous Self-Healing Infrastructure is an agentic engine that turns silent failures into auditable assets.
+          It uses <strong>Make.com</strong> as a Serverless MCP Host to give Gemini 2.0 direct control over industrial infrastructure, executing fixes and generating forensic reports without human intervention.
         </p>
         <div class="p-6 rounded-xl bg-slate-900 border border-slate-800 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <div class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Objective</div>
-            <div class="text-white font-medium">Scale Support Logic</div>
+            <div class="text-white font-medium">Autonomous Remediation</div>
           </div>
           <div>
             <div class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Engine</div>
-            <div class="text-white font-medium">Make + Gemini 2.0</div>
+            <div class="text-white font-medium">Gemini 2.0 + Vector Search</div>
           </div>
           <div>
-            <div class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Protocol</div>
-            <div class="text-white font-medium">MCP Serverless</div>
+            <div class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Output</div>
+            <div class="text-white font-medium">Forensic HTML Reports</div>
           </div>
         </div>
       </section>
@@ -178,33 +178,32 @@
         <Globe class="text-orange-500" /> Universal Error Intelligence
       </h2>
       <p class="text-slate-400">
-        FoxOps operates as a central nervous system, handling distinct failure classes with a single engine.
+        FoxOps operates as a central nervous system, utilizing deterministic <strong>AI Signatures</strong> to handle distinct failure classes with a single engine.
       </p>
         <div class="overflow-hidden rounded-xl border border-slate-800">
           <table class="w-full text-left text-sm text-slate-400">
             <thead class="bg-slate-900 text-xs uppercase font-bold text-white">
               <tr>
                 <th class="px-6 py-4">Domain</th>
-                <th class="px-6 py-4">Error Type</th>
+                <th class="px-6 py-4">Error Signature</th>
                 <th class="px-6 py-4">Auto-Heal Strategy</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-800 bg-[#0B1121]">
               <tr>
                 <td class="px-6 py-4 font-medium text-white">🏭 Industrial</td>
-                <td class="px-6 py-4 font-mono text-xs text-rose-400">Pressure &lt; 4.0 bar</td>
-                <td class="px-6 py-4">Trigger Maintenance Stop SOP</td>
+                <td class="px-6 py-4 font-mono text-xs text-rose-400">Servo Overheat (Temp &gt; 85°C)</td>
+                <td class="px-6 py-4">Trigger Cool-down &amp; Recalibration SOP</td>
               </tr>
               <tr>
                 <td class="px-6 py-4 font-medium text-white">🤖 RPA Bots</td>
-                <td class="px-6 py-4 font-mono text-xs text-rose-400">ElementNotFound</td>
-                <td class="px-6 py-4">Execute Fallback Selector Logic</td>
+                <td class="px-6 py-4 font-mono text-xs text-rose-400">SelectorNotFound / Timeout</td>
+                <td class="px-6 py-4">Execute Fallback DOM Logic</td>
               </tr>
-
               <tr>
                 <td class="px-6 py-4 font-medium text-white">☁️ DevOps</td>
-                <td class="px-6 py-4 font-mono text-xs text-rose-400">503 Service Unavailable</td>
-                <td class="px-6 py-4">Restart Service / Scale Resources</td>
+                <td class="px-6 py-4 font-mono text-xs text-rose-400">OOM Kill / 503 Unavailable</td>
+                <td class="px-6 py-4">Restart Service / Scale Pods</td>
               </tr>
             </tbody>
           </table>

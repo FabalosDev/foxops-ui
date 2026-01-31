@@ -1,11 +1,12 @@
-# 🦊 FoxOps: Universal Autonomous Incident Response Engine
-
 ![Status](https://img.shields.io/badge/STATUS-STABLE-success?style=for-the-badge)
 ![Lane](https://img.shields.io/badge/LANE-1_CAREER-blue?style=for-the-badge)
 ![Version](https://img.shields.io/badge/VERSION-1.0.0-orange?style=for-the-badge)
 
+# 🦊 FoxOps' Autonomous Self-Healing Infrastructure & SOP Generation
+
 > **"If it’s not documented, it didn’t happen."**
-> The "Context Healer" for Fabalos OS. Bridging AI Reasoning (Gemini) with Industrial Execution (Make + MCP) to turn silent failures into auditable assets.
+>
+> The "Context Healer" for Fabalos OS. Bridging AI Reasoning (Gemini 2.0) with Industrial Execution (Make + MCP) to turn silent failures into auditable assets.
 
 ---
 
@@ -15,11 +16,65 @@
 
 Unlike passive logging tools, FoxOps actively executes **"Self-Healing Cycles"**. It uses Vector Search to match error signatures against a knowledge base of Standard Operating Procedures (SOPs), executes the fix via Make.com, and auto-generates forensic documentation.
 
-**The Core Philosophy:** The system doesn't care *where* the error comes from. If it generates an error message, FoxOps can triage it, fix it, and document it.
+**The Core Philosophy:** The system doesn't care _where_ the error comes from. If it generates an error message, FoxOps can triage it, fix it, and document it.
 
 ---
 
-## 2. Universal Error Intelligence
+## 2. System Architecture
+
+The architecture follows a strict **"Observe-Orient-Decide-Act" (OODA)** loop, leveraging Edge Computing for sanitization and Agentic AI for reasoning.
+
+### 🧠 The Intelligence Stack
+
+- **Ingestion (The Shield):** Cloudflare Worker acts as the firewall, sanitizing raw logs into deterministic **AI Signatures** (e.g., converting `0x4F5A` → `{HEX}`) to ensure Idempotency.
+
+- **The Brain (Reasoning):** **Gemini 2.0 Flash** handles high-speed triage (0.4s latency), while **Gemini 1.5 Pro** handles deep forensic analysis and SOP generation.
+
+- **The Memory (Context):** **Supabase Vector** stores SOP embeddings, allowing the system to recall fixes for similar incidents ("Semantic Recall").
+
+- **The Hands (Action):** **Make.com** acts as the orchestration bus, connecting the brain to 500+ services (Slack, Jira, AWS, Email).
+
+
+---
+
+## 3. Key Features
+
+### 🛡️ Deterministic "AI Signature" Normalization
+
+To prevent "LLM Hallucinations" and ensure consistent vector matching, FoxOps strips variable data (IPs, Timestamps, Memory Addresses) at the edge.
+
+- _Raw Input:_ `Error: Connection timeout at 192.168.1.55`
+
+- _FoxOps Signature:_ `Error: Connection timeout at {IP}`
+
+- _Result:_ 100% Consistent SOP Retrieval.
+
+
+### 🔄 The Self-Healing Loop
+
+1. **Detect:** Log arrives via Webhook.
+
+2. **Search:** System queries Vector DB for an existing SOP.
+
+3. **Execute:** If found, the SOP (e.g., "Restart Service") is executed automatically.
+
+4. **Learn:** If **NOT** found, Gemini Pro researches the error, drafts a _new_ SOP, and saves it to the database for next time.
+
+
+### 📄 Instant Forensic HTML Reporting
+
+FoxOps doesn't just fix the issue; it proves it. Every incident generates an immutable **Forensic Report** containing:
+
+- Timestamp & Severity
+
+- Tech Stack Trace
+
+- Resolution Actions
+
+- HTML-formatted layout ready for Email/PDF.
+
+
+## 4. Universal Error Intelligence
 
 FoxOps operates as a central nervous system for technical infrastructure, handling distinct failure classes with a single engine:
 
@@ -33,7 +88,7 @@ FoxOps operates as a central nervous system for technical infrastructure, handli
 
 ---
 
-## 3. Technical Stack
+## 5. Technical Stack
 
 | Layer | Technology | Function |
 | :--- | :--- | :--- |
@@ -46,7 +101,7 @@ FoxOps operates as a central nervous system for technical infrastructure, handli
 
 ---
 
-## 4. Data Flow Architecture
+## 6. Data Flow Architecture
 
 The system operates on a linear, idempotent pipeline designed to handle "dirty" industrial data without crashing.
 
@@ -78,7 +133,7 @@ The system operates on a linear, idempotent pipeline designed to handle "dirty" 
 
 ---
 
-## 5-Layer "Omnichannel" Ingestion
+## 7. 4-Layer "Omnichannel" Ingestion
 FoxOps doesn't just listen to one stream. It monitors the entire operational reality across four dimensions:
 
 | Dimension | Entry Point | Example Scenario |
@@ -92,7 +147,7 @@ FoxOps doesn't just listen to one stream. It monitors the entire operational rea
 
 ---
 
-## 6. Key Technical Features
+## 8. Key Technical Features
 
 ### 🛡️ Edge-Layer Data Scrubbing (Cloudflare)
 To protect the automation engine from "Garbage In, Garbage Out," a Cloudflare Worker acts as the gatekeeper. It intercepts raw TCP streams from industrial controllers, removing non-compliant characters and enforcing schema validation before the data ever consumes a Make.com operation.
@@ -107,7 +162,7 @@ The system generates a styled, legal-grade HTML report within the orchestration 
 
 ---
 
-## 7. API Payload Specification
+## 9. API Payload Specification
 
 The SvelteKit frontend receives the following standardized JSON structure via the Webhook Response:
 
@@ -134,6 +189,34 @@ The SvelteKit frontend receives the following standardized JSON structure via th
 }
 
 ```
+---
+
+## 10. Deployment
+
+### Prerequisites
+
+- Supabase Project with `vector` extension enabled.
+
+- Google Vertex AI / Gemini API Key.
+
+- Make.com Account.
+
+
+### Quick Start
+
+Bash
+
+```
+# 1. Clone the Repository
+git clone https://github.com/fabalos/foxops-engine.git
+
+# 2. Deploy Edge Worker
+npx wrangler deploy
+
+# 3. Configure Make Webhook
+# Point your application logging driver to the Cloudflare Worker URL.
+```
+
 ---
 
 > **Part of the Master of Make 2026 Submission.**
