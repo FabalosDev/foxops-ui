@@ -169,17 +169,29 @@
     fetchIncidents(page);
   }
 
-  async function triggerFinalReport(incident: any) {
+async function triggerFinalReport(incident: any) {
     if (!incident) return;
     isReporting = true;
     const reportWebhook = "https://hook.eu2.make.com/mmqk3qu5dg2eyc1zvjsb6vnuq84kv5g7";
 
     const timestamp = new Date().toISOString();
+
+    // 1. Set Defaults
     let finalSopTitle = incident.title;
-    let finalSopContent = "No SOP";
-    if (selectedSop !== 'none' && selectedSop !== 'new') {
+    let finalSopContent = "No SOP linked. Remediation was ad-hoc.";
+
+    // 2. Handle Logic Branches
+    if (selectedSop === 'new') {
+        // ✅ FIX A: Capture the "New SOP" inputs
+        finalSopTitle = newSopTitle || "Untitled SOP";
+        finalSopContent = newSopContent || "No content provided.";
+    } else if (selectedSop !== 'none') {
+        // ✅ FIX B: Capture the "Existing SOP" selection
         const s = availableSops.find(x => x.id === selectedSop);
-        if (s) { finalSopTitle = s.name; finalSopContent = s.workflow_description; }
+        if (s) {
+            finalSopTitle = s.name;
+            finalSopContent = s.workflow_description;
+        }
     }
 
     const payload = {
@@ -187,16 +199,26 @@
         ticketId: resolvingTicketId,
         technician: technicianName,
         notes: resolutionNotes,
-        sop: finalSopTitle,
-        html_report: ``
+        sop_title: finalSopTitle,
+        sop_content: finalSopContent,
+        html_report:
     };
 
     try {
-        await fetch(reportWebhook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
+        // Debugging: Check console to see exactly what is being sent
+        console.log("Sending Payload:", payload);
+
+        await fetch(reportWebhook, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+
         await resolveIncident(incident.id);
         resolvingId = null;
     } catch (e) {
-        console.error(e);
+        console.error("Webhook Failed:", e);
+        alert("Failed to send report. Check console.");
     } finally {
         isReporting = false;
     }
