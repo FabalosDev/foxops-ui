@@ -5,7 +5,7 @@
   } from 'lucide-svelte';
   import { fade, fly } from 'svelte/transition';
 
-  // CONFIG: Hits your local server endpoint
+  // CONFIG
   const API_ENDPOINT = "/api/incidents/ingest";
 
   // --- DATA: SCENARIOS (Flat JSON Protocol) ---

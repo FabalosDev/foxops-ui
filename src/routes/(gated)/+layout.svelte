@@ -1,9 +1,9 @@
 <script>
   import '../../app.css';
-  import Gatekeeper from "$lib/components/Gatekeeper.svelte";
+
   let { children } = $props();
 </script>
 
-<Gatekeeper>
-  {@render children()}
-</Gatekeeper>
+<div class="min-h-screen bg-[#050914] text-white">
+    {@render children()}
+</div>

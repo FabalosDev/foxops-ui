@@ -1,7 +1,6 @@
 <script lang="ts">
   import { Github, Terminal, Cpu, Activity } from 'lucide-svelte';
 
-  // 1. Svelte 5 way to receive props (Replaces export let)
   let {
     activeIncidents = [],
     metrics = { totalOps: 0, activeTickets: 0 }

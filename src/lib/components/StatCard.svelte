@@ -1,6 +1,4 @@
 <script lang="ts">
-  // Svelte 5 Props Definition
-  // Added 'logic' as an optional prop
   let { label, value, icon: Icon, color, logic = "" } = $props();
 </script>
 

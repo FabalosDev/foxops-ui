@@ -17,7 +17,7 @@ export const load = async ({ locals }) => {
             .select('*', { count: 'exact' });
 
         return {
-            session, // <-- PASS THIS TO FRONTEND
+            session,
             allIncidents: incidentsData || [],
             metrics: {
                 totalOps,

@@ -2,11 +2,9 @@
   import { Cpu, Terminal, Zap, Activity, LayoutDashboard } from 'lucide-svelte';
 
   // --- CONFIGURATION ---
-  // Hitting local server endpoint
   const API_ENDPOINT = "/api/incidents/ingest";
 
   // --- DATA: FLATTENED PAYLOAD ---
-  // No more nested "input.meta.identity". Just flat keys.
   const payload = {
     origin: "foxops_portal",
     priority: "HIGH",

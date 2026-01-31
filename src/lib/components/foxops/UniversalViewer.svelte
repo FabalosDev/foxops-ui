@@ -7,7 +7,7 @@
 
     const dispatch = createEventDispatcher();
 
-    // SENIOR LOGIC: Deep Extraction & Cleaning
+    // Deep Extraction & Cleaning
     // This handles both Flat rows and Nested JSON structures automatically.
     $: viewData = (() => {
         if (!item) return { html: null, title: 'SYSTEM REPORT' };

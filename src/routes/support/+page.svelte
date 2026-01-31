@@ -66,8 +66,6 @@
     status = "loading";
     const selectedTenant = tenants.find(t => t.id === clientId) || tenants[0];
 
-    // --- ARCHITECT FIX: FLATTENED PAYLOAD ---
-    // We send the 9 keys directly to the server. No nesting.
     const flatPayload = {
       origin: selectedSource.origin,
       priority: selectedSource.priority,
@@ -81,7 +79,6 @@
     };
 
     try {
-      // Hit our own server endpoint
       const res = await fetch(API_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

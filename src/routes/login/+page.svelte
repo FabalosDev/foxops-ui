@@ -17,13 +17,12 @@
         password
     });
 
-    if (error) {
-        errorMsg = error.message;
-        loading = false;
-    } else {
-        // Success: The root layout will detect the session and let us in
-        goto('/');
-    }
+if (error) {
+    errorMsg = error.message;
+    loading = false;
+} else {
+    goto('/', { invalidateAll: true });
+}
   }
 </script>
 

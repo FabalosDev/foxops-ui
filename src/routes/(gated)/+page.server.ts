@@ -68,7 +68,7 @@ export const load = async () => {
         console.error("Error fetching FoxOps metrics:", err);
         return {
             allIncidents: [],
-            recentReports: [], // Fallback empty array
+            recentReports: [],
             metrics: { totalOps: 0 },
             stats: { investigating: 0, learning: 0, selfHealed: 0, escalated: 0, resolved: 0, invalid: 0 }
         };
