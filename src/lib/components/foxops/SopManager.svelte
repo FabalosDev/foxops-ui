@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { supabase } from '$lib/supabaseClient';
-    import { FileText, Save, X, Edit3, ToggleLeft, ToggleRight, Loader2, Wifi, Globe } from 'lucide-svelte';
+    import { FileText, Save, X, Edit3, ToggleLeft, ToggleRight, Loader2, Wifi, Globe, ShieldCheck, ShieldAlert } from 'lucide-svelte';
 
     export let onClose: () => void;
 
@@ -14,60 +14,64 @@
     let editTitle = "";
     let editContent = "";
     let editSelfHealing = false;
+    let editVerified = false;
     let editWebhookTrigger = "";
 
     onMount(async () => {
         await fetchSops();
     });
 
-async function fetchSops() {
-    loading = true;
-    console.log("Initiating SOP Fetch..."); //
+    async function fetchSops() {
+        loading = true;
 
-    const { data, error } = await supabase
-        .from('sops')
-        .select('*')
-        .order('name', { ascending: true });
+        const { data, error } = await supabase
+            .from('sops')
+            .select('*')
+            .order('name', { ascending: true });
 
-    if (error) {
-        console.error("SUPABASE ERROR:", error.message); //
-        console.error("ERROR DETAILS:", error); //
-    } else if (data) {
-        console.log("DATA FETCHED:", data); //
+        if (error) {
+            console.error("SUPABASE ERROR:", error.message);
+        } else if (data) {
+            sops = data.map(s => ({
+                id: s.id,
+                title: s.name,
+                content: s.workflow_description,
+                is_self_healing: s.is_self_healing,
+                webhook_trigger: s.webhook_trigger,
+                verified: s.is_sop_verified // <--- FIXED: Matches your screenshot column
+            }));
+        }
 
-        sops = data.map(s => ({
-            id: s.id,
-            title: s.name,
-            content: s.workflow_description,
-            is_self_healing: s.is_self_healing,
-            webhook_trigger: s.webhook_trigger
-        }));
-
-        console.log("MAPPED SOPS:", sops); //
+        loading = false;
     }
-
-    loading = false;
-}
 
     function startEdit(sop: any) {
         editingId = sop.id;
         editTitle = sop.title;
         editContent = sop.content;
         editSelfHealing = sop.is_self_healing;
+        editVerified = sop.verified;
         editWebhookTrigger = sop.webhook_trigger || "";
     }
 
     async function saveEdit() {
         saving = true;
 
+        // Logic: If we are setting it to TRUE, we sign and timestamp it.
+        // If FALSE, we clear the signature.
+        const updatePayload = {
+            name: editTitle,
+            workflow_description: editContent,
+            is_self_healing: editSelfHealing,
+            webhook_trigger: editWebhookTrigger,
+            is_sop_verified: editVerified, // <--- FIXED: Column name
+            verified_by: editVerified ? 'System Chief Engineer' : null, // Auto-sign
+            verified_at: editVerified ? new Date().toISOString() : null // Auto-timestamp
+        };
+
         const { error } = await supabase
             .from('sops')
-            .update({
-                name: editTitle,
-                workflow_description: editContent,
-                is_self_healing: editSelfHealing,
-                webhook_trigger: editWebhookTrigger
-            })
+            .update(updatePayload)
             .eq('id', editingId);
 
         if (!error) {
@@ -78,7 +82,8 @@ async function fetchSops() {
                     title: editTitle,
                     content: editContent,
                     is_self_healing: editSelfHealing,
-                    webhook_trigger: editWebhookTrigger
+                    webhook_trigger: editWebhookTrigger,
+                    verified: editVerified
                 };
             }
             editingId = null;
@@ -109,8 +114,16 @@ async function fetchSops() {
                             on:click={() => startEdit(sop)}
                             class={`w-full text-left p-3 rounded mb-1 transition-all flex items-center justify-between group ${editingId === sop.id ? 'bg-blue-600/20 border border-blue-500/50 shadow-lg shadow-blue-500/10' : 'hover:bg-white/5 border border-transparent'}`}
                         >
-                            <span class="text-xs font-bold text-slate-300">{sop.title}</span>
-                            <div class="flex gap-1">
+                            <div class="flex items-center gap-2 overflow-hidden">
+                                {#if sop.verified}
+                                    <ShieldCheck size={12} class="text-emerald-500 shrink-0" />
+                                {:else}
+                                    <ShieldAlert size={12} class="text-amber-500/50 shrink-0" />
+                                {/if}
+                                <span class="text-xs font-bold text-slate-300 truncate">{sop.title}</span>
+                            </div>
+
+                            <div class="flex gap-1 shrink-0">
                                 {#if sop.webhook_trigger}
                                     <Globe size={10} class="text-blue-400" title="Webhook Configured" />
                                 {/if}
@@ -127,17 +140,36 @@ async function fetchSops() {
 
             <div class="flex-1 p-6 bg-[#0B1121] flex flex-col overflow-y-auto">
                 {#if editingId}
-                    <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center justify-between mb-6 gap-4">
                         <input bind:value={editTitle} class="bg-transparent text-xl font-bold text-white focus:outline-none w-full border-b border-transparent focus:border-blue-500/50 pb-1" />
 
-                        <button on:click={() => editSelfHealing = !editSelfHealing} class="flex items-center gap-2 ml-4 shrink-0">
-                            <span class="text-[10px] font-mono uppercase text-slate-500 tracking-tighter">Self-Healing</span>
-                            {#if editSelfHealing}
-                                <ToggleRight class="text-emerald-500" size={32} />
-                            {:else}
-                                <ToggleLeft class="text-slate-600" size={32} />
-                            {/if}
-                        </button>
+                        <div class="flex gap-4 shrink-0">
+                            <button on:click={() => editVerified = !editVerified} class="flex flex-col items-end gap-1 group">
+                                <span class={`text-[8px] font-mono uppercase tracking-widest ${editVerified ? 'text-emerald-400' : 'text-amber-500'}`}>
+                                    {editVerified ? 'Verified & Locked' : 'Unverified Draft'}
+                                </span>
+                                <div class="flex items-center gap-2">
+                                    {#if editVerified}
+                                        <ShieldCheck size={16} class="text-emerald-500" />
+                                        <ToggleRight class="text-emerald-500" size={32} />
+                                    {:else}
+                                        <ShieldAlert size={16} class="text-amber-500" />
+                                        <ToggleLeft class="text-slate-600 group-hover:text-slate-400" size={32} />
+                                    {/if}
+                                </div>
+                            </button>
+
+                            <button on:click={() => editSelfHealing = !editSelfHealing} class="flex flex-col items-end gap-1">
+                                <span class="text-[8px] font-mono uppercase text-slate-500 tracking-widest">Self-Healing</span>
+                                <div class="flex items-center gap-2">
+                                    {#if editSelfHealing}
+                                        <ToggleRight class="text-blue-500" size={32} />
+                                    {:else}
+                                        <ToggleLeft class="text-slate-600" size={32} />
+                                    {/if}
+                                </div>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="mb-6">
