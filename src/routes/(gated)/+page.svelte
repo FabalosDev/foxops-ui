@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
-  import { invalidateAll } from '$app/navigation';
+  import { invalidateAll, goto } from '$app/navigation'; // Added goto for redirect
   import { supabase } from '$lib/supabaseClient';
   import type { PageData } from '../$types';
 
@@ -26,7 +26,8 @@
     ShieldCheck,
     Target,
     Database,
-    Trophy
+    Trophy,
+    LogOut // Added Logout Icon
   } from 'lucide-svelte';
 
   export let data: PageData;
@@ -61,6 +62,17 @@
 
   function toggleSopManager() {
     showSopManager = !showSopManager;
+  }
+
+  // --- NEW: LOGOUT LOGIC ---
+  async function handleLogout() {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+        console.error("Logout failed:", error);
+    } else {
+        // Redirect to login screen
+        goto('/login');
+    }
   }
 
 // --- FETCH LOGIC ---
@@ -140,10 +152,12 @@ async function fetchIncidents() {
       const sessionAttempts = activeIncidents.filter(i =>
           (i.sop_match_id && i.sop_match_id !== 'null') ||
           (i.resolved_by_sop_id && i.resolved_by_sop_id !== 'null')
-      ).length;
-      const sessionWins = activeIncidents.filter(i => i.status && i.status.toUpperCase().includes('AUTO_HEALED')).length;
-      if (sessionAttempts === 0) return 100;
-      return Math.round((sessionWins / sessionAttempts) * 100);
+      );
+      const sessionWins = activeIncidents.filter(i => i.status && i.status.toUpperCase().includes('AUTO_HEALED'));
+
+      // Calculate percentage based on attempts
+      if (sessionAttempts.length === 0) return 100;
+      return Math.round((sessionWins.length / sessionAttempts.length) * 100);
     })()
   };
 </script>
@@ -186,6 +200,10 @@ async function fetchIncidents() {
 
         <button on:click={toggleSopManager} class="text-xs font-bold text-slate-500 hover:text-white transition-colors border border-white/10 px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 flex items-center gap-2">
            <BookOpen size={14} /> SOP Matrix
+        </button>
+
+        <button on:click={handleLogout} title="Sign Out" class="text-xs font-bold text-rose-500 hover:text-rose-400 transition-colors border border-rose-500/20 h-8 w-8 rounded bg-rose-500/10 hover:bg-rose-500/20 flex items-center justify-center">
+            <LogOut size={14} />
         </button>
       </div>
     </div>
@@ -231,7 +249,7 @@ async function fetchIncidents() {
       />
     </div>
 
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
 
        <div class="p-4 bg-slate-900/50 border border-white/5 rounded-xl flex flex-col justify-between gap-3">
           <div class="flex items-center gap-4">
