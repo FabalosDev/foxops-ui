@@ -27,7 +27,8 @@
     Target,
     Database,
     Trophy,
-    LogOut // Added Logout Icon
+    LogOut,
+    Terminal // Added Logout Icon
   } from 'lucide-svelte';
 
   export let data: PageData;

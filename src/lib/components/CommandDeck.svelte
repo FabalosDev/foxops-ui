@@ -130,23 +130,38 @@
   }
 </script>
 
-<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-stretch mb-8">
+
+    <div class="h-full p-4 rounded-xl bg-blue-950/20 border border-blue-500/20 flex flex-col justify-between shadow-lg shadow-blue-900/5 backdrop-blur-sm">
+        <div class="flex items-start gap-4 mb-2">
+             <div class="p-2.5 bg-blue-500/10 rounded-lg border border-blue-500/20 shrink-0">
+                  <Terminal size={20} class="text-blue-400" />
+             </div>
+             <h3 class="text-xs font-bold text-blue-400 uppercase tracking-widest pt-1">
+                 Inject Payload
+             </h3>
+        </div>
+        <p class="text-sm text-slate-400 leading-relaxed">
+             Inject raw JSON payloads to trigger <span class="text-white font-mono bg-white/5 px-1.5 py-0.5 rounded text-[10px] border border-white/10">CRITICAL</span> self-healing simulations.
+        </p>
+    </div>
+
   {#each scenarios as item}
     <button
       onclick={() => openModal(item)}
-      class="group text-left p-3 rounded-xl border border-white/5 bg-slate-900/50 hover:bg-slate-800 transition-all hover:border-white/10 relative overflow-hidden"
+      class="group h-full text-left p-4 rounded-xl border border-white/5 bg-slate-900/50 hover:bg-slate-800 transition-all hover:border-white/10 relative overflow-hidden flex flex-col justify-between"
     >
-      <div class="relative z-10">
-        <div class="flex items-start justify-between mb-2">
-          <div class="p-1.5 rounded-lg {item.bg} {item.border} border">
-            <svelte:component this={item.icon} size={16} class={item.color} />
+      <div class="relative z-10 w-full">
+        <div class="flex items-start justify-between mb-3">
+          <div class="p-2 rounded-lg {item.bg} {item.border} border">
+            <svelte:component this={item.icon} size={18} class={item.color} />
           </div>
           <div class="opacity-0 group-hover:opacity-100 transition-opacity text-slate-500">
-            <Play size={14} />
+            <Play size={16} />
           </div>
         </div>
-        <h3 class="text-xs font-bold text-white mb-0.5">{item.title}</h3>
-        <p class="text-[10px] text-slate-500 leading-tight">{item.desc}</p>
+        <h3 class="text-sm font-bold text-white mb-1">{item.title}</h3>
+        <p class="text-xs text-slate-500 leading-tight">{item.desc}</p>
       </div>
     </button>
   {/each}
@@ -169,7 +184,7 @@
       <div class="p-5 space-y-4">
         <div class="p-3 rounded-lg bg-black border border-slate-800 font-mono text-[10px] h-32 overflow-y-auto space-y-1">
           {#if logs.length === 0}
-             <span class="text-slate-600">> Ready to inject...</span>
+              <span class="text-slate-600">> Ready to inject...</span>
           {/if}
           {#each logs as log}
             <div class="text-slate-300 border-l-2 border-slate-700 pl-2">{log}</div>
