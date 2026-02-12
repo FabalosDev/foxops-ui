@@ -24,7 +24,9 @@
     ChevronUp,
     Eye,
     Brain,
-    FileText // Added for the Entry Link
+    FileText,
+    TrendingUp,
+    BarChart3
   } from 'lucide-svelte';
 
   // Toggle for Technical Deep Dive
@@ -42,6 +44,7 @@
   // Navigation Data
   const sections = [
     { id: 'hero', label: 'The Problem', icon: AlertTriangle },
+    { id: 'global-impact', label: '$1.5T Market Gap', icon: Globe }, // NEW SECTION
     { id: 'comparison', label: '1.2s Advantage', icon: Zap },
     { id: 'use-cases', label: 'Who Is This For?', icon: Users },
     { id: 'how-it-works', label: 'How It Works', icon: Activity },
@@ -60,28 +63,28 @@
   // Refined "Who It's For" Data
   const industryCases = [
     {
-        title: "E-Commerce & SaaS",
-        pain: "Payment Gateway Down",
-        fix: "Auto-switch to Backup Stripe/PayPal account instantly.",
-        icon: "money"
-    },
-    {
-        title: "Agencies & Automation",
-        pain: "Make Scenario API Limits",
-        fix: "Auto-implement exponential backoff & retry logic.",
-        icon: "api"
-    },
-    {
-        title: "Industrial & Manufacturing",
-        pain: "Robot/Sensor Overheat",
-        fix: "Trigger physical cool-down SOPs & notify floor mgr.",
+        title: "Global Manufacturing",
+        pain: "Unplanned Downtime",
+        fix: "Predictive SOPs reduce downtime by 30-50%.",
         icon: "factory"
     },
     {
-        title: "Customer Support Ops",
-        pain: "Support Agent Quits",
-        fix: "AI Agent takes over tickets using historical SOPs.",
-        icon: "bust"
+        title: "Automotive Sector",
+        pain: "$22,000 Per Minute Loss",
+        fix: "Auto-remediation prevents the 65% cost rise.",
+        icon: "car"
+    },
+    {
+        title: "Fortune Global 500",
+        pain: "$129M Loss Per Facility",
+        fix: "Turn silent failures into auditable assets.",
+        icon: "money"
+    },
+    {
+        title: "High-Volume Tech",
+        pain: "Hidden Labor Costs",
+        fix: "Eliminates idle labor & rush repair fees.",
+        icon: "cpu"
     }
   ];
 
@@ -120,21 +123,24 @@
          </nav>
 
          <div class="mb-8">
-            <h3 class="text-[10px] uppercase font-bold text-slate-600 tracking-widest mb-2 px-3">Legacy Documentation</h3>
+            <h3 class="text-[10px] uppercase font-bold text-slate-600 tracking-widest mb-2 px-3">The Winning Submission</h3>
             <a href="/make-challenge/entry" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-all border border-blue-500/20 group">
                 <FileText size={16} class="group-hover:scale-110 transition-transform"/>
-                Original Engineering Entry
+                View Legacy Documentation
             </a>
+            <p class="text-[10px] text-slate-600 px-3 mt-2 leading-tight">
+                This is the original technical entry that secured our spot in the Top 6.
+            </p>
          </div>
 
          <div class="mt-auto pt-6 border-t border-white/5">
              <div class="p-3 bg-gradient-to-br from-orange-500/10 to-rose-500/10 border border-orange-500/20 rounded-lg">
                  <div class="flex items-center gap-2 mb-2">
-                    <AlertTriangle size={14} class="text-orange-400" />
-                    <span class="text-[10px] font-bold text-orange-400 uppercase">The Cost</span>
+                    <TrendingUp size={14} class="text-orange-400" />
+                    <span class="text-[10px] font-bold text-orange-400 uppercase">Rising Costs</span>
                  </div>
                  <p class="text-[11px] text-slate-400 leading-relaxed">
-                    "<strong class="text-white">$10k per minute.</strong> That's the cost of downtime in high-volume production. Speed is survival."
+                    Downtime costs have risen <strong class="text-white">65%</strong> in recent years. Unplanned stops are <strong class="text-white">35% more expensive</strong> than planned maintenance.
                  </p>
               </div>
          </div>
@@ -149,12 +155,11 @@
 
             <h1 class="text-5xl lg:text-7xl font-black text-white leading-[0.9] mb-6 tracking-tight">
                 Stop Losing <br class="hidden lg:block"/>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-rose-600">$450,000</span> Per Incident.
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-rose-600">$129 Million</span> Per Year.
             </h1>
 
             <p class="text-xl text-slate-400 leading-relaxed max-w-2xl mb-10 lg:mx-0 mx-auto">
-                Your infrastructure fixes itself in <span class="text-white font-bold bg-white/10 px-1 rounded">1.2 seconds</span>.
-                While you sleep. While you're on vacation. Always.
+                Unplanned downtime costs Fortune Global 500 companies <span class="text-white font-bold">$129M per facility</span> annually. FoxOps stops the bleeding in <span class="text-white font-bold bg-white/10 px-1 rounded">1.2 seconds</span>.
             </p>
 
             <div class="flex flex-col sm:flex-row items-center gap-4 mb-16 lg:justify-start justify-center">
@@ -167,13 +172,57 @@
             </div>
         </section>
 
+        <section id="global-impact" class="max-w-5xl mx-auto mb-20">
+            <h2 class="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+                <Globe class="text-blue-400" /> The Scale of the Crisis
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-[#0B1121] p-6 rounded-2xl border border-white/5 hover:border-blue-500/30 transition-colors">
+                    <div class="text-[10px] uppercase text-slate-500 font-bold tracking-widest mb-2">Global Annual Loss</div>
+                    <div class="text-4xl font-black text-white mb-2">$1.5 Trillion</div>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Unplanned downtime costs large global manufacturers roughly <strong>11% of their yearly turnover</strong>.
+                    </p>
+                </div>
+
+                <div class="bg-[#0B1121] p-6 rounded-2xl border border-white/5 hover:border-orange-500/30 transition-colors">
+                    <div class="text-[10px] uppercase text-slate-500 font-bold tracking-widest mb-2">Cost Per Facility</div>
+                    <div class="text-4xl font-black text-orange-400 mb-2">$129 Million</div>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        For Fortune Global 500 companies, this is the average annual loss <strong>per facility</strong>. Costs have risen 65%.
+                    </p>
+                </div>
+
+                <div class="bg-[#0B1121] p-6 rounded-2xl border border-white/5 hover:border-rose-500/30 transition-colors">
+                    <div class="text-[10px] uppercase text-slate-500 font-bold tracking-widest mb-2">Automotive Sector</div>
+                    <div class="text-4xl font-black text-rose-500 mb-2">$22,000 / min</div>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        When the line stops, cash burns. Automotive faces costs exceeding <strong>$2 Million per hour</strong>.
+                    </p>
+                </div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-blue-900/10 border border-blue-500/20 flex items-start gap-4">
+                <div class="p-2 bg-blue-500/10 rounded-lg shrink-0">
+                    <BarChart3 class="text-blue-400" size={20} />
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-blue-100 mb-1">The Predictive Advantage</h4>
+                    <p class="text-xs text-blue-200/70 leading-relaxed">
+                        Implementing predictive maintenance (like FoxOps) can mitigate these costs, with potential reductions in downtime of <strong>30-50%</strong>. Unplanned downtime is <strong>35% more costly</strong> than planned maintenance due to idle labor, rush repairs, and reputation damage.
+                    </p>
+                </div>
+            </div>
+        </section>
+
         <section id="comparison" class="max-w-5xl mx-auto mb-20">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="p-8 rounded-3xl bg-[#0B1121] border border-rose-500/20 opacity-90 relative overflow-hidden group">
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-rose-500/50"></div>
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-xl font-bold text-rose-400 flex items-center gap-2">
-                            <Clock size={24} /> Traditional
+                            <Clock size={24} /> Reactive
                         </h3>
                         <span class="text-rose-900/20 group-hover:text-rose-500/10 font-black text-6xl transition-colors absolute right-4 top-4 select-none">SLOW</span>
                     </div>
@@ -185,8 +234,8 @@
                         <li class="flex justify-between text-white font-bold pt-2 text-lg"><span>TOTAL TIME</span> <span class="text-rose-500">45 MIN</span></li>
                     </ul>
                     <div class="bg-rose-950/30 rounded-xl p-4 text-center border border-rose-500/20">
-                        <div class="text-[10px] uppercase text-rose-400 font-bold tracking-widest mb-1">Cost Impact</div>
-                        <div class="text-2xl font-black text-rose-500">$450,000 LOSS</div>
+                        <div class="text-[10px] uppercase text-rose-400 font-bold tracking-widest mb-1">Cost Impact (Auto)</div>
+                        <div class="text-2xl font-black text-rose-500">$990,000 LOSS</div>
                     </div>
                 </div>
 
@@ -194,7 +243,7 @@
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-500 to-cyan-500"></div>
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
-                            <Zap size={24} class="fill-current" /> FoxOps
+                            <Zap size={24} class="fill-current" /> Predictive
                         </h3>
                         <span class="text-emerald-900/20 font-black text-6xl absolute right-4 top-4 select-none">INSTANT</span>
                     </div>
@@ -213,27 +262,6 @@
             </div>
         </section>
 
-        <section class="max-w-5xl mx-auto mb-24">
-             <div class="grid grid-cols-2 md:grid-cols-4 gap-px bg-slate-800/50 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-                 <div class="bg-[#0B1121] p-6 text-center hover:bg-slate-900 transition-colors">
-                    <div class="text-3xl font-black text-white mb-1">127</div>
-                    <div class="text-[10px] uppercase text-slate-500 font-bold tracking-widest">Incidents Resolved</div>
-                 </div>
-                 <div class="bg-[#0B1121] p-6 text-center hover:bg-slate-900 transition-colors">
-                    <div class="text-3xl font-black text-emerald-400 mb-1">1.2s</div>
-                    <div class="text-[10px] uppercase text-slate-500 font-bold tracking-widest">Avg Response Time</div>
-                 </div>
-                 <div class="bg-[#0B1121] p-6 text-center hover:bg-slate-900 transition-colors">
-                    <div class="text-3xl font-black text-orange-400 mb-1">99.9%</div>
-                    <div class="text-[10px] uppercase text-slate-500 font-bold tracking-widest">Uptime Preserved</div>
-                 </div>
-                 <div class="bg-[#0B1121] p-6 text-center hover:bg-slate-900 transition-colors">
-                    <div class="text-3xl font-black text-blue-400 mb-1">$2.1M</div>
-                    <div class="text-[10px] uppercase text-slate-500 font-bold tracking-widest">Est. Revenue Saved</div>
-                 </div>
-            </div>
-        </section>
-
         <section id="use-cases" class="max-w-5xl mx-auto mb-24">
             <h2 class="text-2xl font-bold text-white mb-8 text-center">Is Your Industry at Risk?</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -242,9 +270,10 @@
                     <div class="flex items-start gap-4">
                         <div class="mt-1 p-2 rounded-lg bg-white/5 group-hover:bg-orange-500/10 transition-colors">
                             {#if item.icon === 'bust'} <Users size={20} class="text-slate-400 group-hover:text-orange-400" /> {/if}
-                            {#if item.icon === 'api'} <Terminal size={20} class="text-slate-400 group-hover:text-orange-400" /> {/if}
+                            {#if item.icon === 'cpu'} <Cpu size={20} class="text-slate-400 group-hover:text-orange-400" /> {/if}
                             {#if item.icon === 'money'} <DollarSign size={20} class="text-slate-400 group-hover:text-orange-400" /> {/if}
                             {#if item.icon === 'factory'} <Activity size={20} class="text-slate-400 group-hover:text-orange-400" /> {/if}
+                            {#if item.icon === 'car'} <Zap size={20} class="text-slate-400 group-hover:text-orange-400" /> {/if}
                         </div>
                         <div>
                             <h4 class="font-bold text-white text-lg mb-1">{item.title}</h4>
@@ -391,7 +420,7 @@
           allowfullscreen>
         </iframe>
                 </div>
-                 </div>
+            </div>
 
             <div class="text-center">
                 <a href="/" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 px-12 rounded-xl transition-all shadow-lg shadow-emerald-900/30 text-lg">
