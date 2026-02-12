@@ -144,6 +144,38 @@
                  </p>
               </div>
          </div>
+
+         <div class="mt-8 pt-6 border-t border-white/5">
+    <h3 class="text-[10px] uppercase font-bold text-slate-600 tracking-widest mb-3 px-3">Data Sources</h3>
+
+    <div class="px-3 space-y-4">
+        <div class="group relative">
+            <div class="flex items-start gap-2 cursor-help">
+                <FileText size={14} class="text-slate-500 mt-0.5 shrink-0" />
+                <p class="text-[10px] text-slate-500 leading-tight group-hover:text-slate-300 transition-colors">
+                    <span class="font-bold">Siemens (Senseye) 2022/24:</span>
+                    "The True Cost of Downtime" Report.
+                </p>
+            </div>
+            <div class="absolute bottom-full left-0 w-64 bg-slate-800 text-xs text-slate-300 p-3 rounded-lg border border-white/10 shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 mb-2">
+                Source for: $1.5T Global Loss, 11% Turnover, $129M/Facility, 65% Cost Rise.
+            </div>
+        </div>
+
+        <div class="group relative">
+            <div class="flex items-start gap-2 cursor-help">
+                <BarChart3 size={14} class="text-slate-500 mt-0.5 shrink-0" />
+                <p class="text-[10px] text-slate-500 leading-tight group-hover:text-slate-300 transition-colors">
+                    <span class="font-bold">ATS / Nielsen Research:</span>
+                    Automotive Downtime Analysis.
+                </p>
+            </div>
+            <div class="absolute bottom-full left-0 w-64 bg-slate-800 text-xs text-slate-300 p-3 rounded-lg border border-white/10 shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 mb-2">
+                Source for: $22,000/minute cost in automotive manufacturing.
+            </div>
+        </div>
+    </div>
+</div>
     </aside>
 
     <main class="flex-1 p-6 lg:p-12 relative z-10 overflow-y-auto scroll-smooth">
