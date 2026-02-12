@@ -44,8 +44,8 @@
   // Navigation Data
   const sections = [
     { id: 'hero', label: 'The Problem', icon: AlertTriangle },
-    { id: 'global-impact', label: '$1.5T Market Gap', icon: Globe }, // NEW SECTION
-    { id: 'comparison', label: '1.2s Advantage', icon: Zap },
+    { id: 'global-impact', label: '$1.5T Market Gap', icon: Globe },
+    { id: 'comparison', label: 'Latency Eliminated', icon: Zap }, // RENAMED
     { id: 'use-cases', label: 'Who Is This For?', icon: Users },
     { id: 'how-it-works', label: 'How It Works', icon: Activity },
     { id: 'deep-dive', label: 'Technical Specs', icon: Terminal },
@@ -133,6 +133,38 @@
             </p>
          </div>
 
+         <div class="mt-8 pt-6 border-t border-white/5">
+            <h3 class="text-[10px] uppercase font-bold text-slate-600 tracking-widest mb-3 px-3">Data Sources</h3>
+
+            <div class="px-3 space-y-4">
+                <div class="group relative">
+                    <div class="flex items-start gap-2 cursor-help">
+                        <FileText size={14} class="text-slate-500 mt-0.5 shrink-0" />
+                        <p class="text-[10px] text-slate-500 leading-tight group-hover:text-slate-300 transition-colors">
+                            <span class="font-bold">Siemens (Senseye) 2022/24:</span>
+                            "The True Cost of Downtime" Report.
+                        </p>
+                    </div>
+                    <div class="absolute bottom-full left-0 w-64 bg-slate-800 text-xs text-slate-300 p-3 rounded-lg border border-white/10 shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 mb-2">
+                        Source for: $1.5T Global Loss, 11% Turnover, $129M/Facility, 65% Cost Rise.
+                    </div>
+                </div>
+
+                <div class="group relative">
+                    <div class="flex items-start gap-2 cursor-help">
+                        <BarChart3 size={14} class="text-slate-500 mt-0.5 shrink-0" />
+                        <p class="text-[10px] text-slate-500 leading-tight group-hover:text-slate-300 transition-colors">
+                            <span class="font-bold">ATS / Nielsen Research:</span>
+                            Automotive Downtime Analysis.
+                        </p>
+                    </div>
+                    <div class="absolute bottom-full left-0 w-64 bg-slate-800 text-xs text-slate-300 p-3 rounded-lg border border-white/10 shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 mb-2">
+                        Source for: $22,000/minute cost in automotive manufacturing.
+                    </div>
+                </div>
+            </div>
+         </div>
+
          <div class="mt-auto pt-6 border-t border-white/5">
              <div class="p-3 bg-gradient-to-br from-orange-500/10 to-rose-500/10 border border-orange-500/20 rounded-lg">
                  <div class="flex items-center gap-2 mb-2">
@@ -144,38 +176,6 @@
                  </p>
               </div>
          </div>
-
-         <div class="mt-8 pt-6 border-t border-white/5">
-    <h3 class="text-[10px] uppercase font-bold text-slate-600 tracking-widest mb-3 px-3">Data Sources</h3>
-
-    <div class="px-3 space-y-4">
-        <div class="group relative">
-            <div class="flex items-start gap-2 cursor-help">
-                <FileText size={14} class="text-slate-500 mt-0.5 shrink-0" />
-                <p class="text-[10px] text-slate-500 leading-tight group-hover:text-slate-300 transition-colors">
-                    <span class="font-bold">Siemens (Senseye) 2022/24:</span>
-                    "The True Cost of Downtime" Report.
-                </p>
-            </div>
-            <div class="absolute bottom-full left-0 w-64 bg-slate-800 text-xs text-slate-300 p-3 rounded-lg border border-white/10 shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 mb-2">
-                Source for: $1.5T Global Loss, 11% Turnover, $129M/Facility, 65% Cost Rise.
-            </div>
-        </div>
-
-        <div class="group relative">
-            <div class="flex items-start gap-2 cursor-help">
-                <BarChart3 size={14} class="text-slate-500 mt-0.5 shrink-0" />
-                <p class="text-[10px] text-slate-500 leading-tight group-hover:text-slate-300 transition-colors">
-                    <span class="font-bold">ATS / Nielsen Research:</span>
-                    Automotive Downtime Analysis.
-                </p>
-            </div>
-            <div class="absolute bottom-full left-0 w-64 bg-slate-800 text-xs text-slate-300 p-3 rounded-lg border border-white/10 shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 mb-2">
-                Source for: $22,000/minute cost in automotive manufacturing.
-            </div>
-        </div>
-    </div>
-</div>
     </aside>
 
     <main class="flex-1 p-6 lg:p-12 relative z-10 overflow-y-auto scroll-smooth">
@@ -186,12 +186,12 @@
             </div>
 
             <h1 class="text-5xl lg:text-7xl font-black text-white leading-[0.9] mb-6 tracking-tight">
-                Stop Losing <br class="hidden lg:block"/>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-rose-600">$129 Million</span> Per Year.
+                Eliminate the <br class="hidden lg:block"/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-rose-600">45-Minute Human Lag</span> <br />in Incident Response.
             </h1>
 
             <p class="text-xl text-slate-400 leading-relaxed max-w-2xl mb-10 lg:mx-0 mx-auto">
-                Unplanned downtime costs Fortune Global 500 companies <span class="text-white font-bold">$129M per facility</span> annually. FoxOps stops the bleeding in <span class="text-white font-bold bg-white/10 px-1 rounded">1.2 seconds</span>.
+                Unplanned downtime costs <span class="text-white font-bold">$129M per facility</span> annually. FoxOps removes the decision latency, responding in <span class="text-white font-bold bg-white/10 px-1 rounded">1.2 seconds</span>.
             </p>
 
             <div class="flex flex-col sm:flex-row items-center gap-4 mb-16 lg:justify-start justify-center">
@@ -263,11 +263,11 @@
                         <li class="flex justify-between border-b border-white/5 pb-2"><span>Investigates logs</span> <span>15 min</span></li>
                         <li class="flex justify-between border-b border-white/5 pb-2"><span>Finds solution</span> <span>10 min</span></li>
                         <li class="flex justify-between border-b border-white/5 pb-2"><span>Implements fix</span> <span>15 min</span></li>
-                        <li class="flex justify-between text-white font-bold pt-2 text-lg"><span>TOTAL TIME</span> <span class="text-rose-500">45 MIN</span></li>
+                        <li class="flex justify-between text-white font-bold pt-2 text-lg"><span>RESPONSE LATENCY</span> <span class="text-rose-500">45 MIN</span></li>
                     </ul>
                     <div class="bg-rose-950/30 rounded-xl p-4 text-center border border-rose-500/20">
-                        <div class="text-[10px] uppercase text-rose-400 font-bold tracking-widest mb-1">Cost Impact (Auto)</div>
-                        <div class="text-2xl font-black text-rose-500">$990,000 LOSS</div>
+                        <div class="text-[10px] uppercase text-rose-400 font-bold tracking-widest mb-1">Result</div>
+                        <div class="text-lg font-black text-rose-500">MAJOR REVENUE LOSS</div>
                     </div>
                 </div>
 
@@ -284,11 +284,11 @@
                         <li class="flex justify-between border-b border-white/5 pb-2"><span>Vector Match SOP</span> <span>0.3s</span></li>
                         <li class="flex justify-between border-b border-white/5 pb-2"><span>Execute Self-Heal</span> <span>0.8s</span></li>
                         <li class="flex justify-between opacity-50 border-b border-white/5 pb-2"><span>Notify Human</span> <span>(Async)</span></li>
-                        <li class="flex justify-between text-white font-bold pt-2 text-lg"><span>TOTAL TIME</span> <span class="text-emerald-400">1.2 SEC</span></li>
+                        <li class="flex justify-between text-white font-bold pt-2 text-lg"><span>RESPONSE LATENCY</span> <span class="text-emerald-400">1.2 SEC</span></li>
                     </ul>
                     <div class="bg-emerald-950/30 rounded-xl p-4 text-center border border-emerald-500/20">
-                        <div class="text-[10px] uppercase text-emerald-400 font-bold tracking-widest mb-1">Cost Impact</div>
-                        <div class="text-2xl font-black text-emerald-400">$0 LOSS</div>
+                        <div class="text-[10px] uppercase text-emerald-400 font-bold tracking-widest mb-1">Result</div>
+                        <div class="text-lg font-black text-emerald-400">THROUGHPUT PRESERVED</div>
                     </div>
                 </div>
             </div>
