@@ -158,7 +158,7 @@ const toolDefinition = {
                 View Legacy Documentation
             </a>
             <p class="text-[10px] text-slate-600 px-3 mt-2 leading-tight">
-                This is the original technical entry that secured our spot in the Top 6.
+                This is the original technical entry that secured my spot in the Top 6.
             </p>
          </div>
 
