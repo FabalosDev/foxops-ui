@@ -88,11 +88,40 @@
     }
   ];
 
-  const toolDefinition = {
+const toolDefinition = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Initiate Triage",
-    "required": ["search_query", "priority"],
-    "properties": { "search_query": { "type": "string" }, "priority": { "enum": ["LOW", "CRITICAL"] } }
+    "title": "Initiate Triage Arguments",
+    "type": "object",
+    "required": [
+      "search_query",
+      "clean_title",
+      "priority",
+      "logic_reasoning"
+    ],
+    "properties": {
+      "search_query": {
+        "type": "string",
+        "description": "Semantic search query derived from telemetry."
+      },
+      "clean_title": {
+        "type": "string",
+        "description": "Standardized professional title for the report."
+      },
+      "priority": {
+        "type": "string",
+        "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+        "description": "AI-determined severity level."
+      },
+      "detected_domain": {
+        "type": "string",
+        "description": "Suspected origin (e.g., 'Stripe', 'AWS')."
+      },
+      "logic_reasoning": {
+        "type": "string",
+        "description": "Technical justification for the priority assignment."
+      }
+    },
+    "additionalProperties": false
   };
 </script>
 
