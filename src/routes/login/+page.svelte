@@ -1,23 +1,12 @@
 <script lang="ts">
   import { supabase } from '$lib/supabaseClient';
   import { goto } from '$app/navigation';
-  import { Lock, ArrowRight, Loader2, Cpu, ShieldCheck, Zap } from 'lucide-svelte';
+  import { Lock, ArrowRight, Loader2, Cpu } from 'lucide-svelte';
 
   let email = "";
   let password = "";
   let loading = false;
   let errorMsg = "";
-
-  // The Magic Function: Injects credentials and logs in automatically
-  async function injectAndLogin() {
-    email = "admin@fabalos.com";
-    password = "Make2026foxops";
-
-    // Optional: Add a small delay so they see it fill up (High-tech feel)
-    await new Promise(r => setTimeout(r, 300));
-
-    handleLogin();
-  }
 
   async function handleLogin() {
     loading = true;
@@ -52,25 +41,6 @@
         </div>
 
         <div class="bg-[#0B1121] border border-slate-800 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
-
-            <div class="mb-6 p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-lg">
-                <div class="flex items-start gap-3">
-                    <ShieldCheck size={16} class="text-emerald-500 mt-0.5 shrink-0" />
-                    <div>
-                        <p class="text-[11px] text-emerald-200/80 leading-relaxed font-mono">
-                            <span class="font-bold text-emerald-400">Make Challenge Access:</span>
-                            Dashboard is open for judges during the evaluation period.
-                        </p>
-                        <button
-                            on:click={injectAndLogin}
-                            class="mt-2 text-[10px] bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 group w-full justify-center"
-                        >
-                            <Zap size={10} class="group-hover:text-yellow-300 transition-colors" />
-                            Auto-Inject Credentials
-                        </button>
-                    </div>
-                </div>
-            </div>
 
             <form on:submit|preventDefault={handleLogin} class="space-y-4">
                 {#if errorMsg}
@@ -113,8 +83,8 @@
         </div>
 
         <div class="mt-8 text-center">
-            <a href="/make-challenge" class="text-xs text-slate-600 hover:text-white transition-colors flex items-center justify-center gap-1">
-                <ArrowRight size={12} class="rotate-180" /> Abort Sequence
+            <a href="/" class="text-xs text-slate-600 hover:text-white transition-colors flex items-center justify-center gap-1">
+                <ArrowRight size={12} class="rotate-180" /> Return to Home
             </a>
         </div>
 
